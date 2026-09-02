@@ -15,9 +15,11 @@
 <link rel="stylesheet" href="css/style.css?v=1.13.0">
 <style>
   .tb-test{
-    font-family:'NeoDunggeunmo',sans-serif; font-size:13px;
+    position:fixed; right:14px; bottom:12px; z-index:1000; pointer-events:none;
+    font-family:'NeoDunggeunmo',sans-serif; font-size:14px;
     background:#c2372a; color:#fff; border:2px solid #e86a5c;
-    border-radius:6px; padding:3px 8px; margin-left:6px; align-self:center;
+    border-radius:7px; padding:4px 11px;
+    box-shadow:0 3px 10px rgba(0,0,0,.45);
   }
   body::after{
     content:''; position:fixed; inset:0; pointer-events:none; z-index:999;
@@ -50,7 +52,7 @@
   <div class="tb-left">
     <img class="tb-icon" src="assets/sprites/desk-icon.png?v=1.13.0" alt="">
     <span class="tb-title">우리 반 자리 바꾸기</span>
-    <span class="tb-ver" id="tbVer"></span><span class="tb-test">테스트</span>
+    <span class="tb-ver" id="tbVer"></span>
   </div>
 
   <div class="tb-center">
@@ -423,6 +425,7 @@
 <script src="js/panel.js?v=1.13.0"></script>
 <script src="js/presets.js?v=1.13.0"></script>
 <script src="js/main.js?v=1.13.0"></script>
+<div class="tb-test">테스트판</div>
 <script>
 /* 서비스 워커 등록 — 인터넷이 끊겨도 열리게 해 줍니다. 실패해도 프로그램은 그대로 돌아갑니다. */
 if ('serviceWorker' in navigator) {
