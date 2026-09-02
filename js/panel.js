@@ -3,9 +3,12 @@
 
 const Panel = {
 
+  /* ⚠️ «설정» 버튼은 켜져도 노랗게 바꾸지 않습니다.
+     열면 패널이 그 버튼을 곧바로 덮어서 보이지도 않는데,
+     닫는 찰나에만 노랗게 번쩍여서 오히려 눈에 거슬립니다.
+     (「교실 편집」·「현재 배치」 는 화면이 그대로 보이므로 켜진 표시를 합니다) */
   open(tab) {
     $('#panel').classList.remove('hidden');
-    $('#btnPanel').classList.add('active');
     if (tab) this.showTab(tab);
     this.syncFromState();
     Sound.play('page');
@@ -13,7 +16,6 @@ const Panel = {
 
   close() {
     $('#panel').classList.add('hidden');
-    $('#btnPanel').classList.remove('active');
     // 미리 보기를 켠 채 수업에 들어가면 학생이 알아챌 수 있으므로 반드시 끕니다
     if (Secret.preview) Secret.setPreview(false);
     Sound.play('page');
