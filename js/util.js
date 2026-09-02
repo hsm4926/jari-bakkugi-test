@@ -40,8 +40,18 @@ function asset(path) {
   // '한 파일' 판에서는 그림·소리가 HTML 안에 통째로 들어 있습니다.
   // 그럴 때는 파일을 새로 부르지 않고 아래 지도에서 바로 꺼내 씁니다.
   if (window.__ASSETS && window.__ASSETS[path]) return window.__ASSETS[path];
-  return path + '?v=' + APP_VERSION.number;
+  return path + '?v=' + assetVer();
 }
+
+/**
+ * 주소 뒤에 붙일 «판 번호».
+ *
+ * 보통은 프로그램 버전이지만, **테스트판은 같은 버전으로 하루에도 몇 번씩 다시 올립니다.**
+ * 그때 번호가 그대로면 브라우저(와 서비스 워커)가 예전 파일을 계속 씁니다.
+ * — 2026-09-02 에 실제로 겪었습니다. 세 번 올렸는데 화면이 첫 번째 판 그대로였습니다.
+ * 그래서 테스트판을 만들 때 build_web.py 가 `build` 에 «버전+올린 시각» 을 적어 둡니다.
+ */
+function assetVer() { return APP_VERSION.build || APP_VERSION.number; }
 
 const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
 const snap  = (v, step) => Math.round(v / step) * step;
