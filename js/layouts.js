@@ -207,13 +207,19 @@ const Layouts = {
       const cur = !!(p && now && this._key(p.pairs) === now);
       const row = el('div', { class: 'slot-item' + (p ? '' : ' empty') + (cur ? ' current' : '') });
 
-      // 윗줄(번호 + 이름)을 누르면 «불러오기». 빈 칸은 누를 것이 없습니다.
-      const head = el('button', {
-        class: 'slot-open',
-        title: cur ? '지금 화면에 깔린 배치입니다'
-             : p   ? '이 배치를 불러옵니다' : '아직 비어 있습니다',
-        onclick: () => { if (p) this.load(i); },
-      });
+      /* ★ 불러오기는 «칸 아무 데나» 눌러도 됩니다.
+         예전에는 이름 글씨만 눌러야 했는데, 232px 창의 한 줄짜리 글씨라
+         겨냥해서 누르기가 번거로웠습니다.
+         아래 버튼들(이름·덮어쓰기·삭제)을 누른 것은 빼야 합니다 — 클릭이 위로 올라옵니다. */
+      if (p) {
+        row.title = cur ? '지금 화면에 깔린 배치입니다' : '누르면 이 배치를 불러옵니다';
+        row.addEventListener('click', (e) => {
+          if (e.target.closest('.slot-btns')) return;
+          this.load(i);
+        });
+      }
+
+      const head = el('div', { class: 'slot-head' });
       head.appendChild(el('span', { class: 'slot-no', text: (i + 1) }));
       head.appendChild(el('span', { class: 'slot-name', text: p ? p.name : '비어 있음' }));
       if (cur) head.appendChild(el('span', { class: 'slot-now', text: '지금' }));

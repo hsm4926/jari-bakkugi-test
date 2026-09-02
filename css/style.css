@@ -784,11 +784,16 @@ body.show-sex .desk.sex-g .sex-no{
    이름 글씨만 옅게 해서 «아직 비었다» 를 알립니다. */
 .slot-item.empty .slot-no{opacity:.5}
 .slot-item.empty .slot-name{color:var(--ink-dim)}
-.slot-item.empty .slot-open{cursor:default}
+
 .slot-item:last-child{margin-bottom:0}
 /* 마우스를 올리면 «칸 전체» 가 밝아집니다 (예전엔 이름 글자만 바뀌어 잘 안 보였습니다) */
-.slot-item:not(.empty){transition:background .12s, border-color .12s}
+/* 찬 칸은 «칸 전체» 가 불러오기 버튼입니다 */
+.slot-item:not(.empty){cursor:pointer; transition:background .12s, border-color .12s}
 .slot-item:not(.empty):hover{background:#453a51; border-color:var(--accent)}
+.slot-item:not(.empty):hover .slot-name{color:var(--accent)}
+.slot-item:not(.empty):active{background:#4d4159}
+/* 아래 버튼들은 각자 제 일을 하므로 «칸 전체 누르기» 에 딸려 들어가지 않습니다 */
+.slot-btns{cursor:default}
 
 /* ★ 지금 화면에 깔린 배치와 «똑같은» 칸에는 노란 불이 들어옵니다.
    («번호 동그라미» 자체가 켜집니다 — 작은 점보다 멀리서도 눈에 띕니다) */
@@ -803,12 +808,10 @@ body.show-sex .desk.sex-g .sex-no{
   color:#3a2a10; background:var(--accent);
   border-radius:99px; padding:2px 7px; flex:none;
 }
-.slot-open{
+.slot-head{
   display:flex; align-items:center; gap:8px; width:100%;
-  background:none; border:none; padding:0; cursor:pointer;
-  color:var(--ink); font-family:inherit; font-size:14px; text-align:left;
+  color:var(--ink); font-size:14px;
 }
-.slot-item:not(.empty) .slot-open:hover .slot-name{color:var(--accent)}
 .slot-item .slot-sub{margin:4px 0 0 34px; white-space:normal; line-height:1.4}
 .slot-btns{display:flex; flex-wrap:wrap; gap:5px; margin:7px 0 0 34px}
 .slot-btns .btn{font-size:12px; padding:3px 8px}
