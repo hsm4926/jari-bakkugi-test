@@ -64,7 +64,9 @@ const Render = {
 
     this.grid();
     this.room();
-    document.documentElement.style.setProperty('--nametag-size', this.nametagSize() + 'px');
+    const rootStyle = document.documentElement.style;
+    rootStyle.setProperty('--nametag-size', this.nametagSize() + 'px');
+    rootStyle.setProperty('--nametag-w', this.nametagWidth() + 'px');
     this.groups();
     this.desks();
     this.cards_();
@@ -75,6 +77,60 @@ const Render = {
   nametagSize() {
     const base = (CONFIG.nametag && CONFIG.nametag.fontSize) || 28;
     return Math.round(base * State.nameMul());
+  },
+
+  /**
+   * 한글 한 글자의 «실제» 폭. 숫자로 못 박지 않고 한 번 재서 기억합니다.
+   *
+   * ⚠️ 두 가지를 조심해야 합니다.
+   *   ① **진짜 이름표와 똑같은 것**을 재야 합니다. 손으로 style 을 흉내 내면
+   *      글꼴 이름 하나만 어긋나도 엉뚱한 값이 나옵니다.
+   *   ② **`offsetWidth` 로 잽니다.** `getBoundingClientRect()` 는 교실 배율(scale)이
+   *      곱해진 «화면» 크기라 100% 가 아닐 때 틀립니다.
+   * 글꼴이 늦게 내려오면 값이 달라지므로 main.js 가 다 받은 뒤 다시 그립니다.
+   */
+  charWidth(fs) {
+    if (this._cw && this._cw.fs === fs) return this._cw.w;
+    const tag = el('div', { class: 'nametag', text: '가나다' });
+    Object.assign(tag.style, { width: 'auto', fontSize: fs + 'px' });
+    const host = el('div', { class: 'card' }, el('div', { class: 'card-in' }, tag));
+    Object.assign(host.style, { visibility: 'hidden', left: '-9999px', top: '0' });
+    ($('#cardLayer') || document.body).appendChild(host);
+    const w = (tag.offsetWidth - 38) / 3 || fs;   // 38 = 좌우 여백 30 + 테두리 8
+    host.remove();
+    this._cw = { fs, w };
+    return w;
+  },
+
+  /**
+   * 이름표 «칸» 의 가로 크기 — 이름이 길든 짧든 늘 같습니다.
+   *
+   *   ① 세 글자가 들어가는 크기 (가장 흔한 길이. 한글 한 글자 = 글씨 크기 × 1)
+   *   ② 옆 자리 딱지와 부딪히지 않는 크기
+   *   둘 중 «작은 쪽» 을 씁니다.
+   *
+   * ②가 없으면 3단계에서 딱지가 옆 자리를 13px 씩 덮습니다.
+   * (책상 사이 거리는 (책상폭+12)×배율 이고, 그림자가 4px 이라 8px 까지는 겹쳐 보이지 않습니다)
+   */
+  nametagWidth() {
+    const fs = this.nametagSize();
+    const natural = Math.ceil(this.charWidth(fs) * 3) + 38;   // 여백 30 + 테두리 8
+    const room = Math.round((CONFIG.desk.width + 12) * State.deskMul()) + 8;
+    return Math.min(natural, room);
+  },
+
+  /**
+   * 이 이름에 쓸 글씨 크기 — «그 칸에 들어가는 만큼» 입니다.
+   * 세 글자까지는 대개 기본 크기 그대로, 네 글자부터는 줄어듭니다.
+   * 이름마다 칸 크기가 달라지면 교실이 들쭉날쭉해 보이고,
+   * 긴 이름은 옆 자리 딱지를 덮어 버립니다.
+   */
+  nametagFont(name) {
+    const base = this.nametagSize();
+    const n = Math.max(1, [...String(name || '').trim()].length);
+    const inner = this.nametagWidth() - 38;                  // 글자가 들어갈 폭
+    const fit = Math.floor((inner + 2) * base / (this.charWidth(base) * n));
+    return Math.max(11, Math.min(base, fit));
   },
 
   /* ---------------- 격자 ---------------- */
@@ -329,6 +385,9 @@ const Render = {
     this._avatarImgs.push(img);
 
     const tag = el('div', { class: 'nametag', text: stu.name });
+    // 네 글자부터는 글씨를 줄여 «같은 칸» 안에 넣습니다
+    const fs = this.nametagFont(stu.name);
+    if (fs !== this.nametagSize()) tag.style.fontSize = fs + 'px';
     const dk = State.desk(deskId);
     const grp = dk ? State.group(dk.gid) : null;
     if (grp) tag.style.borderColor = grp.color;

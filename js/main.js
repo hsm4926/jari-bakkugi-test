@@ -364,6 +364,14 @@ function boot() {
   $('#tbVer').textContent = 'v' + APP_VERSION.number;
   document.documentElement.style.setProperty(
     '--nametag-size', Render.nametagSize() + 'px');
+  document.documentElement.style.setProperty('--nametag-w', Render.nametagWidth() + 'px');
+
+  /* 글꼴은 늦게 내려옵니다. 그 전에 잰 글자 폭으로 이름표 칸을 정하면
+     («가나다» 가 84px 로 나왔다가 실제로는 99px) 칸이 좁아 글씨가 줄어듭니다.
+     다 받은 뒤 한 번 다시 잽니다. */
+  if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(() => { Render._cw = null; Render.all(); }).catch(() => {});
+  }
   const sn = CONFIG.seatNumber || {};
   document.documentElement.style.setProperty('--seatno-size', (sn.size || 40) + 'px');
   document.documentElement.style.setProperty('--seatno-font', (sn.fontSize || 24) + 'px');

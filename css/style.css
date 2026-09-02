@@ -383,12 +383,18 @@ body.show-sex .desk.sex-g .sex-no{
   margin-top:5px;
   font-family:'NeoDunggeunmo',sans-serif;
   /* 교실 TV 로 멀리서 보는 화면이라 이름이 커야 합니다.
-     크기는 config.js 의 nametag.fontSize 로 바꿉니다. */
+     크기는 config.js 의 nametag.fontSize 로 바꿉니다.
+     ★ 딱지 «칸» 은 이름 길이와 상관없이 늘 같은 크기입니다 (--nametag-w).
+       네 글자 이상이면 글씨를 줄여 그 칸 안에 넣습니다 (Render.nametagFont).
+       이름마다 칸 크기가 달라지면 교실이 들쭉날쭉해 보이고,
+       긴 이름은 옆 자리 딱지를 덮어 버립니다. */
   font-size:var(--nametag-size, 28px);
+  width:var(--nametag-w, 137px);
   line-height:1.05;
   background:#fffaf0; color:#3a2a1c;
   border:4px solid var(--desk-edge); border-radius:9px;
-  padding:4px 15px 6px; white-space:nowrap;
+  padding:4px 15px 6px;
+  text-align:center; white-space:nowrap; overflow:hidden;
   box-shadow:0 4px 0 rgba(120,80,40,.4);
 }
 .card-in.pop{animation:pop .4s cubic-bezier(.2,1.6,.4,1)}

@@ -282,9 +282,15 @@ const Editor = {
                   Math.max(...d.desks.map(x => x.x + oldW))) / 2;
       const cy = (Math.min(...d.desks.map(x => x.y)) +
                   Math.max(...d.desks.map(x => x.y + oldH))) / 2;
+      /* 1단계로 «돌아올 때» 는 격자에 붙입니다.
+         오차가 1px 남짓이라 스냅하면 원래 자리를 정확히 되찾고,
+         「줄 맞추기」 버튼이 괜히 뜨는 일도 없습니다.
+         2·3단계에서는 스냅하면 오차가 쌓이므로 반올림만 합니다. */
+      const g = CONFIG.classroom.grid;
+      const fix = (v) => (step === 1 ? snap(v, g) : Math.round(v));
       d.desks.forEach(dk => {
-        dk.x = Math.round(cx + (dk.x + oldW / 2 - cx) * r - State.deskW() / 2);
-        dk.y = Math.round(cy + (dk.y + oldH / 2 - cy) * r - State.deskH() / 2);
+        dk.x = fix(cx + (dk.x + oldW / 2 - cx) * r - State.deskW() / 2);
+        dk.y = fix(cy + (dk.y + oldH / 2 - cy) * r - State.deskH() / 2);
       });
       this._fitDesks();
     }
