@@ -235,22 +235,25 @@ body.editing .desk:active{cursor:grabbing}
   pointer-events:none;
 }
 /* ---------------- 남자 자리 · 여자 자리 ----------------
-   책상 상판 색 자체를 바꿉니다.
+   ★ 색과 딱지는 «교실 편집» 중에만 보입니다 (body.show-sex).
+     평소 교실 화면까지 알록달록하면 알과 이름표가 묻히고,
+     아이들에게 굳이 알릴 정보도 아닙니다.
+     배정 규칙은 색이 보이든 안 보이든 똑같이 지켜집니다.
 
    ⚠️ 처음에는 나무색 책상 위에 반투명한 파랑·분홍을 덮었는데,
       파랑이 나무색(주황)의 보색이라 둘이 섞이면 회색으로 죽어 버려
       남자 자리가 «색이 빠진 책상» 처럼 보였습니다.
       그래서 덮지 않고 상판 색을 통째로 지정합니다. */
-.desk.sex-b{
+body.show-sex .desk.sex-b{
   background:linear-gradient(180deg,#d5e7f6 0%, #aecbe2 55%, #8bacc8 100%);
   border-color:var(--sex-b);
 }
-.desk.sex-g{
+body.show-sex .desk.sex-g{
   background:linear-gradient(180deg,#f8dcee 0%, #e9bcd4 55%, #d59fbb 100%);
   border-color:var(--sex-g);
 }
-.desk.sex-b::before{background:var(--sex-b)}   /* 의자도 같은 색으로 */
-.desk.sex-g::before{background:var(--sex-g)}
+body.show-sex .desk.sex-b::before{background:var(--sex-b)}   /* 의자도 같은 색으로 */
+body.show-sex .desk.sex-g::before{background:var(--sex-g)}
 
 /* «남·여 자리» 를 편집하는 동안에는 테두리를 하나 더 둘러 또렷하게.
    box-shadow 로 하면 마우스를 올렸을 때의 노란 강조를 덮어쓰므로 outline 을 씁니다. */
@@ -264,14 +267,18 @@ body.editing-sex .desk:not(.sex-b):not(.sex-g){opacity:.62}
    왼쪽 위의 자리 번호와 겹치지 않도록 반대쪽 모서리에 답니다. */
 .sex-no{
   position:absolute; right:-9px; top:-10px; z-index:2;
-  display:flex; align-items:center; justify-content:center;
+  display:none; align-items:center; justify-content:center;
   width:30px; height:30px; border-radius:50%;
   font-family:'NeoDunggeunmo',sans-serif; font-size:17px; line-height:1;
   border:3px solid; box-shadow:0 2px 0 rgba(90,60,25,.35);
   pointer-events:none;
 }
-.desk.sex-b .sex-no{background:#f2f8fd; color:var(--sex-b-ink); border-color:var(--sex-b)}
-.desk.sex-g .sex-no{background:#fdf1f7; color:var(--sex-g-ink); border-color:var(--sex-g)}
+body.show-sex .desk.sex-b .sex-no{
+  display:flex; background:#f2f8fd; color:var(--sex-b-ink); border-color:var(--sex-b);
+}
+body.show-sex .desk.sex-g .sex-no{
+  display:flex; background:#fdf1f7; color:var(--sex-g-ink); border-color:var(--sex-g);
+}
 
 .desk-preset{
   position:absolute; inset:auto 0 6px 0; text-align:center;

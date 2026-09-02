@@ -193,12 +193,21 @@ const Render = {
     node.classList.toggle('sex-b', want === 'b');
     node.classList.toggle('sex-g', want === 'g');
 
+    // 보일지 말지는 CSS(body.show-sex)가 정합니다. 여기서는 내용만 씁니다.
     const badge = node.querySelector('.sex-no');
-    if (!badge) return;
-    // config.js 에서 끄면 편집할 때만 보입니다 (평소 교실 화면은 깔끔하게)
-    const always = !CONFIG.deskSex || CONFIG.deskSex.show !== false;
-    badge.textContent = want === 'g' ? '여' : '남';
-    badge.style.display = (want && (always || Editor.mode === 'sex')) ? '' : 'none';
+    if (badge) badge.textContent = want === 'g' ? '여' : '남';
+  },
+
+  /**
+   * 남·여 색과 딱지를 보여 줄지 정합니다.
+   *
+   * 평소 교실 화면에서는 **감춥니다.** 책상이 알록달록하면 알과 이름표가 묻히고,
+   * 아이들에게 굳이 알릴 정보도 아니기 때문입니다.
+   * 배정 규칙은 색이 보이든 안 보이든 똑같이 지켜집니다.
+   */
+  applySexVisible() {
+    const always = CONFIG.deskSex && CONFIG.deskSex.showAlways;
+    document.body.classList.toggle('show-sex', !!Editor.mode || !!always);
   },
 
   /** 모든 책상의 남·여 딱지를 다시 칠합니다 (편집 모드가 바뀔 때) */
@@ -244,6 +253,7 @@ const Render = {
     const mode = Editor.mode;   // null | 'layout' | 'preset'
     $$('.desk-no').forEach(n => n.style.display = mode === 'layout' ? '' : 'none');
     $$('.desk-preset').forEach(n => n.style.display = mode === 'preset' ? '' : 'none');
+    this.applySexVisible();
     this.paintAllSex();
     this.seatNumbers();
   },

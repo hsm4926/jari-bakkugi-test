@@ -4,7 +4,18 @@
 
 const State = {
 
-  KEY: 'woori-jari-bakkugi/v1',
+  /* 저장 이름.
+
+     ⚠️ 브라우저 저장소는 «주소의 폴더» 가 아니라 «사이트(도메인)» 단위입니다.
+        테스트 사이트와 진짜 사이트가 둘 다 hsm4926.github.io 라서,
+        폴더가 달라도 그냥 두면 **같은 저장소를 나눠 쓰게 됩니다.**
+        (실제로 테스트하다가 진짜 사이트의 명단까지 바뀌었습니다)
+
+        그래서 테스트판은 이름 뒤에 -test 를 붙여 완전히 갈라 둡니다.
+        표시는 build_web.py --test 가 넣어 주고, 혹시 그게 빠져도
+        주소에 -test 가 있으면 알아서 갈라집니다. */
+  KEY: 'woori-jari-bakkugi/v1'
+       + ((window.__JARI_TEST || /-test(\/|$)/.test(location.pathname)) ? '-test' : ''),
   data: null,
 
   /* ---------------- 처음 상태 ---------------- */

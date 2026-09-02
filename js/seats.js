@@ -35,11 +35,34 @@ const Seats = {
   check() {
     const d = State.data;
 
-    let boys = 0, girls = 0;
-    d.students.forEach(s => { if (s.sex === 'g') girls++; else boys++; });
+    /* ① 사전에 정해둔 자리는 셈에서 아예 뺍니다.
+       선생님이 직접 «이 자리엔 이 아이» 라고 정해 둔 자리라,
+       남·여 지정보다 우선하고 성별이 달라도 그대로 앉힙니다.
+       그러니 «앉을 수 있는지» 를 따질 때도 그 자리와 그 학생은 이미 끝난 것으로 봅니다.
+       (사전 설정 모드일 때만 실제로 쓰이므로 그때만 뺍니다) */
+    const takenIds  = new Set();   // 이미 자리가 정해진 학생
+    const fixedDesk = new Set();   // 이미 임자가 있는 책상
+    if (d.mode === 'preset') {
+      State.orderedDesks().forEach(dk => {
+        const sid = d.preset[dk.id];
+        if (sid && State.student(sid) && !takenIds.has(sid)) {
+          takenIds.add(sid);
+          fixedDesk.add(dk.id);
+        }
+      });
+    }
 
+    // ② 아직 자리를 못 받은 학생
+    let boys = 0, girls = 0;
+    d.students.forEach(s => {
+      if (takenIds.has(s.id)) return;
+      if (s.sex === 'g') girls++; else boys++;
+    });
+
+    // ③ 아직 비어 있는 자리
     let seatB = 0, seatG = 0, seatFree = 0;
     d.desks.forEach(dk => {
+      if (fixedDesk.has(dk.id)) return;
       const want = State.deskSex(dk);
       if (want === 'b') seatB++;
       else if (want === 'g') seatG++;
@@ -51,44 +74,64 @@ const Seats = {
     const gap   = (needB + needG) - seatFree;   // 0 이하면 모두 앉을 수 있습니다
 
     return {
-      students: d.students.length, boys, girls,
-      seats: d.desks.length, seatB, seatG, seatFree,
+      students: d.students.length,   // 전체 학생 수
+      boys, girls,                   // 그중 아직 자리를 못 받은 인원
+      seats: d.desks.length,         // 전체 책상 수
+      fixed: fixedDesk.size,         // 사전에 임자가 정해진 자리
+      open: seatB + seatG + seatFree, // 아직 비어 있는 자리
+      seatB, seatG, seatFree,
       needB, needG,
-      short: Math.max(0, gap),      // 몇 자리를 더 만들어야 하는지
-      spare: Math.max(0, -gap),     // 남는 자리 수
+      short: Math.max(0, gap),       // 몇 자리를 더 만들어야 하는지
+      spare: Math.max(0, -gap),      // 남는 자리 수
       ok: gap <= 0,
-      usesSex: (seatB + seatG) > 0, // 성별 자리를 쓰는 교실인지
+      usesSex: (seatB + seatG) > 0,  // 성별 자리를 쓰는 교실인지
     };
   },
 
   /* ============================================================
      2) 모자란 이유를 말로 풀어 주기
      ------------------------------------------------------------
-     교실 TV 에 아이들과 함께 보는 화면이므로,
-     "왜 안 되는지" 와 "그래서 뭘 하면 되는지" 를 함께 적습니다.
+     교실 TV 에 아이들과 함께 보는 화면입니다. 길면 아무도 안 읽습니다.
+     딱 세 줄만 씁니다 — 지금 자리 구성 · 못 앉는 사람 · 무엇을 하면 되는지.
      ============================================================ */
-  problems(c) {
+  /**
+   * @param opt.showFixed  «사전 5» 처럼 미리 정해둔 자리 수까지 보여 줄지.
+   *   설정 패널(선생님만 보는 화면)에서만 켭니다.
+   *   화면 한가운데 알림은 아이들도 함께 보므로 **절대 켜지 마세요** —
+   *   지금이 «사전 설정» 모드라는 게 드러나 숨김 기능이 무의미해집니다.
+   */
+  problems(c, opt) {
     c = c || this.check();
     if (c.ok) return [];
+    const fix = (opt && opt.showFixed && c.fixed) ? `   (+ 사전 ${c.fixed})` : '';
 
-    // 성별 자리를 하나도 안 쓰는 교실에서는 남·여 이야기를 꺼내지 않습니다
+    // 성별 자리를 하나도 안 쓰는 교실이면 남·여 이야기를 꺼내지 않습니다
     if (!c.usesSex) {
       return [
-        `학생 ${c.students}명 · 자리 ${c.seats}개`,
-        `자리가 ${c.short}개 모자랍니다.`,
-        `교실 편집에서 책상을 ${c.short}개 더 놓아 주세요.`,
+        `학생 ${c.students}명 · 자리 ${c.open}개` + fix,
+        `${c.short}명이 앉을 자리가 없습니다.`,
+        `⇒ 책상 ${c.short}개를 더 놓아 주세요.`,
       ];
     }
 
-    const out = [
-      `학생 ${c.students}명 — 남 ${c.boys}명 · 여 ${c.girls}명`,
-      `자리 ${c.seats}개 — 남자 ${c.seatB} · 여자 ${c.seatG} · 누구나 ${c.seatFree}`,
+    /* 못 앉는 사람이 남학생인지 여학생인지.
+
+       한쪽만 넘칠 때는 딱 잘라 말할 수 있습니다.
+       («누구나 자리» 를 그쪽이 다 쓰고도 모자란 것이므로)
+
+       양쪽이 다 넘칠 때는 «누구나 자리» 를 남녀가 어떻게 나눠 쓰느냐에 따라
+       달라져서 한 성별로 특정할 수 없습니다. 그래서 합계로 말하고
+       각각 몇 명이 넘쳤는지를 괄호로 덧붙입니다. */
+    let who;
+    if (c.needB && !c.needG)      who = `남학생 ${c.short}명이 앉을 자리가 없습니다.`;
+    else if (c.needG && !c.needB) who = `여학생 ${c.short}명이 앉을 자리가 없습니다.`;
+    else who = `${c.short}명이 앉을 자리가 없습니다. (남 ${c.needB} · 여 ${c.needG} 이 넘침)`;
+
+    return [
+      `자리 ${c.open}개 — 남자 ${c.seatB} · 여자 ${c.seatG} · 누구나 ${c.seatFree}` + fix,
+      who,
+      `⇒ 책상 ${c.short}개를 더 놓아 주세요.`,
     ];
-    if (c.needB) out.push(`남학생 ${c.needB}명이 남자 자리에 다 앉지 못합니다.`);
-    if (c.needG) out.push(`여학생 ${c.needG}명이 여자 자리에 다 앉지 못합니다.`);
-    out.push(`그래서 «누구나 자리» 가 ${c.needB + c.needG}개 필요한데 ${c.seatFree}개뿐입니다.`);
-    out.push(`⇒ 책상을 ${c.short}개 더 놓거나, 자리 지정을 ${c.short}개 풀어 주세요.`);
-    return out;
   },
 
   /** 편집 툴바에 띄우는 한 줄 요약 */

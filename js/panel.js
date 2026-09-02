@@ -121,7 +121,8 @@ const Panel = {
     if (!c.ok) {
       // 앉을 수 없는 사람이 생깁니다 — 섞기 자체가 막힙니다
       warn.classList.add('bad');
-      Seats.problems(c).forEach(t => warn.appendChild(el('div', { text: t })));
+      Seats.problems(c, { showFixed: true })
+           .forEach(t => warn.appendChild(el('div', { text: t })));
       warn.classList.remove('hidden');
       return;
     }
@@ -132,7 +133,8 @@ const Panel = {
       }));
       if (c.usesSex) {
         warn.appendChild(el('div', {
-          text: `(남자 자리 ${c.seatB} · 여자 자리 ${c.seatG} · 누구나 앉는 자리 ${c.seatFree})`,
+          text: `(남자 자리 ${c.seatB} · 여자 자리 ${c.seatG} · 누구나 앉는 자리 ${c.seatFree}`
+                + (c.fixed ? ` · 사전에 정해둔 자리 ${c.fixed}` : '') + ')',
         }));
       }
       warn.classList.remove('hidden');
