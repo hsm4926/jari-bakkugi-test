@@ -11,6 +11,52 @@ const View = {
   panY: 0,
 
   /* ============================================================
+     교실 뒤집기 (180°) — 학생 시점 ↔ 교사 시점
+     ------------------------------------------------------------
+     평소 화면은 **학생 시점**입니다. 아이들이 교실 TV 를 보면서
+     «내 자리가 어디지?» 를 찾아야 하니, 칠판이 위에 있는 그림이 맞습니다.
+
+     그런데 선생님은 교실 뒤에서 아이들을 마주 보고 서 있습니다.
+     그때는 화면과 실제 교실이 좌우·앞뒤가 반대라 한눈에 안 들어옵니다.
+     그래서 «교실 뒤집기» 를 누르면 **선생님이 보는 방향**으로 돌려 줍니다.
+
+     ★ 화면을 통째로 rotate(180deg) 하지 않습니다.
+       그러면 이름·번호·캐릭터까지 거꾸로 서서 읽을 수가 없습니다.
+       대신 **놓이는 자리(좌표)만 뒤집어 다시 그립니다.**
+       덕분에 글씨는 똑바로 서 있고 픽셀 그림도 그대로입니다.
+
+     ⚠️ 저장하지 않습니다. «지금 잠깐 보는 시점» 이지 교실 설정이 아니라서,
+        다음에 프로그램을 켰을 때 뒤집힌 채로 뜨면 오히려 당황합니다.
+     ============================================================ */
+  flipped: false,
+
+  /**
+   * 교실 안의 논리 좌표 → 화면에 실제로 놓을 자리.
+   * 뒤집지 않았으면 그대로 돌려줍니다.
+   *
+   * @param w,h  그 물건의 크기. 사각형은 «왼쪽 위 모서리» 로 놓이므로,
+   *             뒤집으면 반대쪽 모서리가 기준이 되어 크기만큼 빼 줘야 합니다.
+   *             점(크기 없음)이면 0 을 넘기거나 생략하세요.
+   */
+  place(x, y, w, h) {
+    if (!this.flipped) return { x: x, y: y };
+    const r = State.data.room;
+    return { x: r.w - x - (w || 0), y: r.h - y - (h || 0) };
+  },
+
+  toggleFlip() {
+    this.flipped = !this.flipped;
+    document.body.classList.toggle('flipped', this.flipped);
+    $('#btnFlip').classList.toggle('active', this.flipped);
+    Render.all();
+    // 편집 중이었다면 골라 둔 것의 표시를 되살립니다 (다시 그리면서 지워집니다)
+    if (Editor.mode) Editor.select(Editor.sel);
+    Sound.play('page');
+    banner(this.flipped ? '교사 시점 — 아이들을 마주 본 방향입니다'
+                        : '학생 시점 — 아이들이 TV 로 보는 방향입니다', 2600);
+  },
+
+  /* ============================================================
      안전한 배율만 쓰기
      ------------------------------------------------------------
      픽셀 그림은 '원본 1픽셀 = 화면 정수 칸' 일 때만 반듯하게 나옵니다.
@@ -158,7 +204,13 @@ const View = {
   /** 화면 좌표 → 교실 안의 좌표 */
   toStage(clientX, clientY) {
     const r = $('#stage').getBoundingClientRect();
-    return { x: (clientX - r.left) / this.zoom, y: (clientY - r.top) / this.zoom };
+    const x = (clientX - r.left) / this.zoom;
+    const y = (clientY - r.top) / this.zoom;
+    if (!this.flipped) return { x: x, y: y };
+    // 뒤집힌 상태에서는 화면의 오른쪽 아래가 교실의 왼쪽 위입니다.
+    // 여기서 되돌려 놓으면 끌기 계산(dx·dy)은 아무것도 안 고쳐도 맞아떨어집니다.
+    const rm = State.data.room;
+    return { x: rm.w - x, y: rm.h - y };
   },
 };
 
@@ -329,6 +381,7 @@ function wireEvents() {
   $('#btnRevealRand').onclick = () => Shuffle.revealAll('random'); // 뒤죽박죽 순서로
   $('#btnRevealNow').onclick  = () => Shuffle.revealNow();
   $('#btnReset').onclick     = () => Shuffle.reset();
+  $('#btnFlip').onclick      = () => View.toggleFlip();
   $('#btnEdit').onclick      = () => { Sound.play('click'); Editor.toggle(); };
   $('#btnPanel').onclick     = () => Panel.toggle();
   $('#btnZoomIn').onclick    = () => View.zoomBy(+1);
@@ -448,6 +501,7 @@ function wireEvents() {
       case 'w': case 'W': case 'ㅈ': Shuffle.revealAll('random'); break;
       case 'd': case 'D': case 'ㅇ': Shuffle.revealNow(); break;
       case 'r': case 'R': case 'ㄱ': Shuffle.reset(); break;
+      case 't': case 'T': case 'ㅅ': View.toggleFlip(); break;
       case 'e': case 'E': case 'ㄷ': Editor.toggle(); break;
       case 'f': case 'F': case 'ㄹ': toggleFullscreen(); break;
       case '+': case '=': View.zoomBy(+1); break;

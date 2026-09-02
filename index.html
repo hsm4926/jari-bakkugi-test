@@ -4,15 +4,15 @@
 <meta charset="utf-8">
 <meta name="theme-color" content="#2c2434">
 <meta name="description" content="초등학교 교실용 자리 바꾸기 프로그램. 알을 깨서 한 명씩 자리를 공개합니다.">
-<link rel="manifest" href="manifest.webmanifest?v=1.9.1">
-<link rel="apple-touch-icon" href="icons/icon-180.png?v=1.9.1">
+<link rel="manifest" href="manifest.webmanifest?v=1.10.0">
+<link rel="apple-touch-icon" href="icons/icon-180.png?v=1.10.0">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="자리 바꾸기">
 <script>window.__JARI_TEST=true;</script>
 <title>[테스트] 우리 반 자리 바꾸기</title>
-<link rel="icon" href="assets/sprites/desk-icon.png?v=1.9.1">
-<link rel="stylesheet" href="css/fonts.css?v=1.9.1">
-<link rel="stylesheet" href="css/style.css?v=1.9.1">
+<link rel="icon" href="assets/sprites/desk-icon.png?v=1.10.0">
+<link rel="stylesheet" href="css/fonts.css?v=1.10.0">
+<link rel="stylesheet" href="css/style.css?v=1.10.0">
 <style>
   .tb-test{
     font-family:'NeoDunggeunmo',sans-serif; font-size:13px;
@@ -33,9 +33,9 @@
 <div id="startCover">
   <div class="sc-box">
     <div class="sc-cast">
-      <img src="assets/sprites/student/boy1-3.png?v=1.9.1" alt="">
-      <img src="assets/sprites/egg/01.png?v=1.9.1" class="sc-egg" alt="">
-      <img src="assets/sprites/student/girl1-1.png?v=1.9.1" alt="">
+      <img src="assets/sprites/student/boy1-3.png?v=1.10.0" alt="">
+      <img src="assets/sprites/egg/01.png?v=1.10.0" class="sc-egg" alt="">
+      <img src="assets/sprites/student/girl1-1.png?v=1.10.0" alt="">
     </div>
     <div class="sc-title">우리 반 자리 바꾸기</div>
     <div class="sc-ver" id="scVer"></div>
@@ -48,7 +48,7 @@
 <!-- ===================== 상단 툴바 ===================== -->
 <header id="toolbar">
   <div class="tb-left">
-    <img class="tb-icon" src="assets/sprites/desk-icon.png?v=1.9.1" alt="">
+    <img class="tb-icon" src="assets/sprites/desk-icon.png?v=1.10.0" alt="">
     <span class="tb-title">우리 반 자리 바꾸기</span>
     <span class="tb-ver" id="tbVer"></span><span class="tb-test">테스트</span>
   </div>
@@ -59,6 +59,8 @@
     <button id="btnRevealRand" class="btn">랜덤 공개</button>
     <button id="btnRevealNow" class="btn">한 번에 공개</button>
     <button id="btnReset" class="btn btn-ghost">다시 덮기</button>
+    <button id="btnFlip" class="btn btn-sm btn-ghost"
+            title="교실을 180° 돌립니다 — 선생님이 아이들을 마주 본 방향 (T)">⇅ 뒤집기</button>
   </div>
 
   <div class="tb-right">
@@ -375,19 +377,19 @@
 
 <div id="toast" class="hidden"></div>
 
-<script src="version.js?v=1.9.1"></script>
-<script src="config.js?v=1.9.1"></script>
-<script src="js/util.js?v=1.9.1"></script>
-<script src="js/audio.js?v=1.9.1"></script>
-<script src="js/state.js?v=1.9.1"></script>
-<script src="js/seats.js?v=1.9.1"></script>
-<script src="js/layout.js?v=1.9.1"></script>
-<script src="js/render.js?v=1.9.1"></script>
-<script src="js/editor.js?v=1.9.1"></script>
-<script src="js/shuffle.js?v=1.9.1"></script>
-<script src="js/panel.js?v=1.9.1"></script>
-<script src="js/presets.js?v=1.9.1"></script>
-<script src="js/main.js?v=1.9.1"></script>
+<script src="version.js?v=1.10.0"></script>
+<script src="config.js?v=1.10.0"></script>
+<script src="js/util.js?v=1.10.0"></script>
+<script src="js/audio.js?v=1.10.0"></script>
+<script src="js/state.js?v=1.10.0"></script>
+<script src="js/seats.js?v=1.10.0"></script>
+<script src="js/layout.js?v=1.10.0"></script>
+<script src="js/render.js?v=1.10.0"></script>
+<script src="js/editor.js?v=1.10.0"></script>
+<script src="js/shuffle.js?v=1.10.0"></script>
+<script src="js/panel.js?v=1.10.0"></script>
+<script src="js/presets.js?v=1.10.0"></script>
+<script src="js/main.js?v=1.10.0"></script>
 <script>
 /* 서비스 워커 등록 — 인터넷이 끊겨도 열리게 해 줍니다. 실패해도 프로그램은 그대로 돌아갑니다. */
 if ('serviceWorker' in navigator) {

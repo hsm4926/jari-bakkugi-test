@@ -161,12 +161,10 @@ const Editor = {
     State.save();
   },
 
-  /** 책상이 움직이면 그 위의 카드도 따라오게 */
+  /** 책상이 움직이면 그 위의 카드도 따라오게.
+      좌표 변환(교실 뒤집기)이 한 곳에서만 일어나도록 Render.moveCard 를 거칩니다. */
   syncCards() {
-    State.data.desks.forEach(dk => {
-      const c = Render.cards[dk.id];
-      if (c) { c.root.style.transition = 'none'; c.root.style.transform = `translate(${dk.x}px, ${dk.y}px)`; }
-    });
+    State.data.desks.forEach(dk => Render.moveCard(dk.id, dk.x, dk.y, 0));
   },
 
   /* ============================================================

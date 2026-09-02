@@ -80,6 +80,8 @@ img{image-rendering:pixelated}
 .tb-center{flex:1; display:flex; justify-content:center; gap:10px}
 .tb-right{display:flex; align-items:center; gap:8px; min-width:230px; justify-content:flex-end}
 #btnShuffle{font-size:20px; padding:11px 26px}
+/* 교실 뒤집기 — 자주 쓰는 버튼이 아니라 작게 둡니다. 켜지면 노랗게 바뀝니다(.btn.active) */
+#btnFlip{align-self:center; padding:7px 11px}
 .zoom-box{
   display:flex; align-items:center; gap:4px;
   background:#392f44; border:2px solid #4d4159; border-radius:8px; padding:3px 6px;
@@ -208,6 +210,11 @@ body.editing .group-tag:active{cursor:grabbing}
   content:''; position:absolute; left:50%; transform:translateX(-50%);
   bottom:-16px; width:46%; height:12px;
   background:var(--desk-edge); border-radius:0 0 6px 6px; opacity:.75;
+}
+/* 교실을 뒤집으면 의자도 반대편으로 갑니다.
+   (자리만 뒤집고 그림은 그대로 두므로, 의자만 따로 옮겨 줘야 자연스럽습니다) */
+body.flipped .desk::before{
+  bottom:auto; top:-16px; border-radius:6px 6px 0 0;
 }
 .desk:hover{box-shadow:0 5px 0 rgba(120,80,40,.45), 0 0 0 4px rgba(255,207,92,.55)}
 .desk.selected{box-shadow:0 5px 0 rgba(120,80,40,.45), 0 0 0 4px var(--select)}

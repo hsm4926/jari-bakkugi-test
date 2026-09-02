@@ -88,8 +88,9 @@ const Render = {
     const d = State.data;
 
     const board = el('div', { class: 'board', 'data-kind': 'board', text: '칠 판' });
+    const bp = View.place(d.board.x, d.board.y, d.board.w, d.board.h);
     Object.assign(board.style, {
-      left: d.board.x + 'px', top: d.board.y + 'px',
+      left: bp.x + 'px', top: bp.y + 'px',
       width: d.board.w + 'px', height: d.board.h + 'px',
       fontSize: Math.round(d.board.h * 0.42) + 'px',
     });
@@ -97,8 +98,9 @@ const Render = {
 
     d.lockers.forEach(lk => {
       const n = el('div', { class: 'locker', 'data-kind': 'locker', 'data-id': lk.id, text: '사 물 함' });
+      const p = View.place(lk.x, lk.y, lk.w, lk.h);
       Object.assign(n.style, {
-        left: lk.x + 'px', top: lk.y + 'px',
+        left: p.x + 'px', top: p.y + 'px',
         width: lk.w + 'px', height: lk.h + 'px',
         fontSize: Math.round(lk.h * 0.4) + 'px', letterSpacing: '4px',
       });
@@ -115,16 +117,18 @@ const Render = {
       if (!box) return;
 
       const zone = el('div', { class: 'group-zone', 'data-kind': 'zone', 'data-id': g.id });
+      const bp = View.place(box.x, box.y, box.w, box.h);
       Object.assign(zone.style, {
-        left: box.x + 'px', top: box.y + 'px',
+        left: bp.x + 'px', top: bp.y + 'px',
         width: box.w + 'px', height: box.h + 'px',
         borderColor: g.color, backgroundColor: g.color + '14', color: g.color,
       });
       layer.appendChild(zone);
 
       const tag = el('div', { class: 'group-tag', 'data-kind': 'group', 'data-id': g.id, text: g.name });
+      // 이름표는 뒤집어도 «화면 기준 위쪽» 에 둡니다 (아래에 붙으면 옆 모둠과 겹칩니다)
       Object.assign(tag.style, {
-        left: box.x + 'px', top: (box.y - 36) + 'px', backgroundColor: g.color,
+        left: bp.x + 'px', top: (bp.y - 36) + 'px', backgroundColor: g.color,
       });
       layer.appendChild(tag);
     });
@@ -140,8 +144,9 @@ const Render = {
     State.orderedDesks().forEach((dk, i) => {
       const g = State.group(dk.gid);
       const node = el('div', { class: 'desk', 'data-kind': 'desk', 'data-id': dk.id });
+      const p = View.place(dk.x, dk.y, dw, dh);
       Object.assign(node.style, {
-        left: dk.x + 'px', top: dk.y + 'px', width: dw + 'px', height: dh + 'px',
+        left: p.x + 'px', top: p.y + 'px', width: dw + 'px', height: dh + 'px',
         borderColor: g ? g.color : 'var(--desk-edge)',
       });
 
@@ -277,9 +282,10 @@ const Render = {
       const idx = students.findIndex(s => s.id === sid);
 
       const card = el('div', { class: 'card', 'data-desk': dk.id });
+      const p = View.place(dk.x, dk.y, dw, dh);
       Object.assign(card.style, {
         width: dw + 'px', height: dh + 'px',
-        transform: `translate(${dk.x}px, ${dk.y}px)`,
+        transform: `translate(${p.x}px, ${p.y}px)`,
       });
       const inner = el('div', { class: 'card-in' });
       card.appendChild(inner);
@@ -358,8 +364,9 @@ const Render = {
   moveCard(deskId, x, y, ms) {
     const c = this.cards[deskId];
     if (!c) return;
+    const p = View.place(x, y, CONFIG.desk.width, CONFIG.desk.height);
     c.root.style.transition = ms ? `transform ${ms}ms cubic-bezier(.4,.05,.35,1)` : 'none';
-    c.root.style.transform = `translate(${x}px, ${y}px)`;
+    c.root.style.transform = `translate(${p.x}px, ${p.y}px)`;
   },
 
   /* ---------------- 프레임 애니메이션 이펙트 ---------------- */
@@ -383,7 +390,9 @@ const Render = {
 
   /** 책상 한가운데 좌표 */
   deskCenter(dk) {
-    return { x: dk.x + CONFIG.desk.width / 2, y: dk.y + CONFIG.desk.height / 2 };
+    const w = CONFIG.desk.width, h = CONFIG.desk.height;
+    const p = View.place(dk.x, dk.y, w, h);
+    return { x: p.x + w / 2, y: p.y + h / 2 };
   },
 
   /* ---------------- 캐릭터 두 프레임 번갈아 보이기 ---------------- */
