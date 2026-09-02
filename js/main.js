@@ -92,7 +92,22 @@ const View = {
     return Math.min(this.snapDown(raw * 0.995), cap);
   },
 
+  /**
+   * 위쪽 막대(툴바·편집바)의 실제 높이를 재서 교실 화면 위치에 반영합니다.
+   * 화면이 좁아 버튼이 두 줄로 접히면 높이가 달라지는데,
+   * 예전처럼 60px·110px 로 못 박아 두면 그만큼 교실이 가려집니다.
+   */
+  syncBars() {
+    const bar = $('#toolbar'), eb = $('#editbar');
+    const root = document.documentElement.style;
+    root.setProperty('--toolbar-h', (bar ? bar.offsetHeight : 60) + 'px');
+    if (eb && !eb.classList.contains('hidden')) {
+      root.setProperty('--editbar-h', eb.offsetHeight + 'px');
+    }
+  },
+
   applyZoom() {
+    this.syncBars();   // 막대 높이가 먼저 정해져야 화면에 맞추는 배율이 맞습니다
     if (this.auto) { this.zoom = this.fitZoom(); this.panX = this.panY = 0; }
     $('#stage').style.transform =
       `translate(${this.panX}px, ${this.panY}px) scale(${this.zoom})`;
@@ -398,6 +413,7 @@ function wireEvents() {
   $('#btnAddDesk').onclick     = () => Editor.addDesk();
   $('#btnAddLocker').onclick   = () => Editor.addLocker();
   $('#btnDelete').onclick      = () => Editor.deleteSelected();
+  $('#btnSnapGrid').onclick    = () => Editor.snapAll();
   $('#btnAutoArrange').onclick = () => Editor.relayout();
 
   /* ---------- 설정 패널 ---------- */

@@ -55,6 +55,7 @@ img{image-rendering:pixelated}
   padding:9px 14px; cursor:pointer;
   transition:transform .06s, background .12s, border-color .12s;
 }
+.btn{white-space:nowrap}
 .btn:hover{background:#4a3e58; border-color:#6d5d7c}
 .btn:active{transform:translateY(2px)}
 .btn-main{background:var(--accent); border-color:#d9a531; color:#3a2a10}
@@ -115,18 +116,25 @@ img{image-rendering:pixelated}
 
 /* ---------------- 교실 화면 ---------------- */
 #viewport{
-  position:absolute; inset:60px 0 0 0;
+  /* 위 여백은 실제 막대 높이를 재서 넣습니다 (View.syncBars).
+     예전에는 60px·110px 로 못 박아 두었는데, 화면이 좁아 버튼이 두 줄이 되면
+     편집 막대가 교실 위쪽을 덮어 버렸습니다. */
+  position:absolute; inset:var(--toolbar-h,60px) 0 0 0;
   cursor:grab;
   display:flex; align-items:center; justify-content:center;
   overflow:hidden;
   background:
     radial-gradient(ellipse at 50% 0%, #33293d 0%, var(--bg) 70%);
 }
-body.editing #viewport{top:110px}
+body.editing #viewport{top:calc(var(--toolbar-h,60px) + var(--editbar-h,51px))}
 body.panning, body.panning *{cursor:grabbing !important}
 
 #stage{
   position:relative;
+  /* ★ flex 자식이라 그냥 두면 창이 교실보다 좁을 때 «눌려서» 가로로 찌그러집니다.
+     (1366×768 에서 교실 폭 1880 이 1365 로 줄어 책상이 바닥 밖으로 나갔습니다)
+     크기는 Render.all() 이 정한 값 그대로 두고, 화면 맞춤은 scale 로만 합니다. */
+  flex:none;
   transform-origin:center center;
   background:
     linear-gradient(180deg, var(--floor) 0%, var(--floor-2) 100%);
@@ -660,3 +668,25 @@ body.show-sex .desk.sex-g .sex-no{
 
 .alert-btns{display:flex; justify-content:center; gap:12px}
 .alert-btns .btn{font-size:18px; padding:11px 24px}
+
+
+/* ============================================================
+   좁은 화면 (노트북 등)
+   ------------------------------------------------------------
+   교실 TV 는 1920 이지만 맥북·노트북은 1366 인 경우가 많습니다.
+   그대로 두면 위쪽 버튼이 두 줄로 접혀 글씨가 잘려 보입니다.
+   ============================================================ */
+@media (max-width:1560px){
+  .tb-left,.tb-right{min-width:0}
+  .tb-title{font-size:18px}
+  .tb-center{gap:6px}
+  .tb-center .btn{font-size:15px; padding:8px 11px}
+  #btnShuffle{font-size:17px; padding:9px 16px}
+  #btnFlip{padding:6px 8px}
+  .eb-hint{display:none}          /* 힌트보다 버튼이 우선입니다 */
+}
+@media (max-width:1320px){
+  .tb-title{display:none}         /* 제목은 없어도 되는 정보입니다 */
+  .tb-center .btn{font-size:14px; padding:7px 9px}
+  .zoom-box{display:none}         /* 확대·축소는 +/- 키와 휠로도 됩니다 */
+}

@@ -123,7 +123,18 @@ const Editor = {
       items = [{ obj: lk, x0: lk.x, y0: lk.y, w0: lk.w, h0: lk.h }];
     }
 
-    this._drag = { start, items, resize, moved: false };
+    /* 여럿을 함께 옮길 때 한 개라도 벽을 넘지 않도록, 전체를 감싸는 범위를 재 둡니다.
+       (예전에는 각자 clamp 해서 벽에 닿은 책상만 멈추고 모둠이 찌그러졌습니다) */
+    const W = (it) => (it.obj.w || CONFIG.desk.width);
+    const H = (it) => (it.obj.h || CONFIG.desk.height);
+    const room = State.data.room;
+    this._drag = {
+      start, items, resize, moved: false,
+      minX: Math.min(...items.map(it => it.x0)),
+      minY: Math.min(...items.map(it => it.y0)),
+      maxX: room.w - Math.max(...items.map(it => it.x0 + W(it))),
+      maxY: room.h - Math.max(...items.map(it => it.y0 + H(it))),
+    };
     node.setPointerCapture && node.setPointerCapture(e.pointerId);
     e.preventDefault();
     return true;
@@ -134,19 +145,30 @@ const Editor = {
     if (!dg) return;
     const g = CONFIG.classroom.grid;
     const p = View.toStage(e.clientX, e.clientY);
-    const dx = snap(p.x - dg.start.x, g);
-    const dy = snap(p.y - dg.start.y, g);
-    if (dx || dy) dg.moved = true;
+    const dx = p.x - dg.start.x;
+    const dy = p.y - dg.start.y;
+    if (Math.abs(dx) > 1 || Math.abs(dy) > 1) dg.moved = true;
 
-    dg.items.forEach(it => {
-      if (dg.resize) {
-        it.obj.w = Math.max(g * 3, it.w0 + dx);
-        it.obj.h = Math.max(g * 2, it.h0 + dy);
-      } else {
-        it.obj.x = clamp(it.x0 + dx, 0, State.data.room.w - (it.obj.w || CONFIG.desk.width));
-        it.obj.y = clamp(it.y0 + dy, 0, State.data.room.h - (it.obj.h || CONFIG.desk.height));
-      }
-    });
+    if (dg.resize) {
+      const it = dg.items[0];
+      it.obj.w = Math.max(g * 3, snap(it.w0 + dx, g));
+      it.obj.h = Math.max(g * 2, snap(it.h0 + dy, g));
+    } else {
+      /* ★ «움직인 거리» 가 아니라 «놓이는 자리» 를 격자에 맞춥니다.
+         거리만 맞추면 처음부터 격자에서 벗어나 있던 물건은 아무리 옮겨도
+         계속 그만큼 어긋난 채로 남습니다. (v1.10.1 에서 고친 문제)
+
+         모둠처럼 여러 개를 함께 옮길 때는 «맨 앞 하나» 만 격자에 맞추고
+         그 차이를 나머지에 똑같이 더합니다. 각자 맞추면 서로의 간격이
+         제각각 달라져서 모둠이 찌그러집니다. */
+      const lead = dg.items[0];
+      let mx = snap(lead.x0 + dx, g) - lead.x0;
+      let my = snap(lead.y0 + dy, g) - lead.y0;
+      // 함께 옮기는 것 전체가 교실 안에 머물도록 제한합니다
+      mx = clamp(mx, -dg.minX, dg.maxX);
+      my = clamp(my, -dg.minY, dg.maxY);
+      dg.items.forEach(it => { it.obj.x = it.x0 + mx; it.obj.y = it.y0 + my; });
+    }
 
     Render.room();
     Render.groups();
@@ -236,6 +258,14 @@ const Editor = {
   },
 
   /* ---------------- 추가 / 삭제 ---------------- */
+
+  /** 새 책상을 놓을 가로 위치. 격자에 맞추고 교실 밖으로 나가지 않게 합니다. */
+  _gx(x) {
+    const g = CONFIG.classroom.grid;
+    const max = Math.floor((State.data.room.w - CONFIG.desk.width) / g) * g;
+    return clamp(snap(x, g), 0, max);
+  },
+
   addGroup() {
     const d = State.data;
     const no = (d.groups.reduce((m, g) => Math.max(m, g.no || 0), 0)) + 1;
@@ -253,8 +283,9 @@ const Editor = {
     for (let i = 0; i < seats; i++) {
       d.desks.push({
         id: uid('dk'), gid: g.id, no: i + 1,
-        x: bx + (i % blk.cols) * (CONFIG.desk.width + blk.gapX),
-        y: by + Math.floor(i / blk.cols) * (CONFIG.desk.height + blk.gapY),
+        // 격자에 맞춰 놓습니다. 안 그러면 이 모둠만 다른 책상들과 줄이 안 맞습니다.
+        x: snap(bx + (i % blk.cols) * (CONFIG.desk.width + blk.gapX), CONFIG.classroom.grid),
+        y: snap(by + Math.floor(i / blk.cols) * (CONFIG.desk.height + blk.gapY), CONFIG.classroom.grid),
       });
     }
     this.afterStructureChange(`${g.name}을(를) 만들었습니다`);
@@ -269,7 +300,7 @@ const Editor = {
       const no = d.desks.reduce((m, x) => Math.max(m, x.no || 0), 0) + 1;
       d.desks.push({
         id: uid('dk'), gid: null, no,
-        x: last ? clamp(last.x + CONFIG.desk.width + 34, 0, d.room.w - CONFIG.desk.width) : 100,
+        x: last ? this._gx(last.x + CONFIG.desk.width + 40) : 100,
         y: last ? last.y : 100,
       });
       this.afterStructureChange('책상을 하나 늘렸습니다');
@@ -286,7 +317,7 @@ const Editor = {
     const no = mine.reduce((m, x) => Math.max(m, x.no || 0), 0) + 1;
     d.desks.push({
       id: uid('dk'), gid, no,
-      x: last ? clamp(last.x + CONFIG.desk.width + 12, 0, d.room.w - CONFIG.desk.width) : 100,
+      x: last ? this._gx(last.x + CONFIG.desk.width + Layout.blockSize(2).gapX) : 100,
       y: last ? last.y : 100,
     });
     this.afterStructureChange('책상을 하나 늘렸습니다');
@@ -325,6 +356,30 @@ const Editor = {
     } else {
       toast('칠판은 지울 수 없습니다');
     }
+  },
+
+  /**
+   * 모든 것을 격자 위에 올려 놓습니다.
+   *
+   * v1.10.1 이전에 «책상 추가»·«모둠 추가» 로 놓은 것들은 격자에서 살짝 벗어나 있어서,
+   * 아무리 끌어 옮겨도 다른 책상과 줄이 딱 맞지 않았습니다. 그런 교실을 한 번에 고칩니다.
+   * 위치만 반 칸(10px) 안쪽으로 움직이므로 배치가 흐트러지지 않습니다.
+   */
+  snapAll() {
+    const d = State.data;
+    const g = CONFIG.classroom.grid;
+    let n = 0;
+    const fix = (o) => {
+      if (!o) return;
+      const x = snap(o.x, g), y = snap(o.y, g);
+      if (x !== o.x || y !== o.y) n++;
+      o.x = x; o.y = y;
+    };
+    d.desks.forEach(fix);
+    d.lockers.forEach(fix);
+    fix(d.board);
+    this.afterStructureChange(
+      n ? `${n}개를 줄에 맞췄습니다` : '이미 모두 줄에 맞아 있습니다');
   },
 
   /** 자리는 그대로 두고 위치만 처음처럼 가지런히 */
