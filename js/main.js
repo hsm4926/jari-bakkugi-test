@@ -363,7 +363,7 @@ const StartCover = {
 function boot() {
   $('#tbVer').textContent = 'v' + APP_VERSION.number;
   document.documentElement.style.setProperty(
-    '--nametag-size', (CONFIG.nametag && CONFIG.nametag.fontSize || 28) + 'px');
+    '--nametag-size', Render.nametagSize() + 'px');
   const sn = CONFIG.seatNumber || {};
   document.documentElement.style.setProperty('--seatno-size', (sn.size || 40) + 'px');
   document.documentElement.style.setProperty('--seatno-font', (sn.fontSize || 24) + 'px');
@@ -424,6 +424,8 @@ function wireEvents() {
   clicky('#btnAddLocker', () => Editor.addLocker());
   clicky('#btnDelete',    () => Editor.deleteSelected());
   clicky('#btnSnapGrid',  () => Editor.snapAll());
+  // 책상 크기 1·2·3 (소리는 setDeskSize 안에서 — 같은 단계를 다시 누르면 아무 일도 안 합니다)
+  $$('.eb-dsize').forEach(b => b.onclick = () => Editor.setDeskSize(b.dataset.dsize));
   // 남·여 자리 붓 (같은 버튼을 다시 누르면 꺼집니다) — setBrush 안에서 소리를 냅니다
   $$('.eb-brush').forEach(b => b.onclick = () => Editor.setBrush(b.dataset.brush));
   $('#btnUndo').onclick        = () => History.undo();

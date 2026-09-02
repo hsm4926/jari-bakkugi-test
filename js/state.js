@@ -49,6 +49,7 @@ const State = {
       revealed: {},        // 책상id -> true    (이미 공개한 자리)
       isShuffled: false,
       useGroups: true,     // 모둠으로 묶어 앉힐지 (false 면 책상만 줄 맞춰 놓습니다)
+      deskScale: 1,        // 「책상 크기」 1 · 2 · 3 단계 (config.js 의 deskSize)
       // 프리셋 목록. 바로 위의 preset(미리 정해둔 자리)과 이름이 비슷하니 헷갈리지 마세요.
       presets: [],         // [{ id, name, savedAt, data:{교실+명단+사전자리} }]
       /* 섞어서 나온 «지금 이 자리 배치» 를 넣어 두는 칸 5개.
@@ -91,6 +92,8 @@ const State = {
     });
     // 배치 칸은 언제나 5개여야 합니다 (예전 저장 자료에는 아예 없습니다)
     out.layouts = this.fixLayouts(d.layouts);
+    // 책상 크기 단계 (예전 저장 자료에는 없습니다 → 1단계)
+    if (![1, 2, 3].includes(out.deskScale)) out.deskScale = 1;
     ['preset', 'assignment', 'revealed'].forEach(k => {
       if (!out[k] || typeof out[k] !== 'object') out[k] = {};
     });
@@ -188,8 +191,8 @@ const State = {
     const pad = 16;
     const x1 = Math.min(...ds.map(d => d.x)) - pad;
     const y1 = Math.min(...ds.map(d => d.y)) - pad;
-    const x2 = Math.max(...ds.map(d => d.x + CONFIG.desk.width)) + pad;
-    const y2 = Math.max(...ds.map(d => d.y + CONFIG.desk.height)) + pad + 14;
+    const x2 = Math.max(...ds.map(d => d.x + State.deskW())) + pad;
+    const y2 = Math.max(...ds.map(d => d.y + State.deskH())) + pad + 14;
     return { x: x1, y: y1, w: x2 - x1, h: y2 - y1 };
   },
 
@@ -199,6 +202,21 @@ const State = {
     while (out.length < Layouts.SLOTS) out.push(null);
     return out.map(x => (x && Array.isArray(x.pairs)) ? x : null);
   },
+
+  /* ============================================================
+     책상 한 개의 크기 — «항상 이 함수를 거쳐서» 씁니다
+     ------------------------------------------------------------
+     CONFIG.desk.width 를 코드에서 직접 읽으면 「책상 크기」 단계가 반영되지 않습니다.
+     (v1.13.0 에서 CONFIG 직접 참조 15곳을 전부 이리로 모았습니다)
+
+     ⚠️ fresh() 가 Layout.build() 를 부르는 시점에는 this.data 가 아직 없습니다.
+        그래서 없으면 1단계로 봅니다.
+     ============================================================ */
+  deskStep()  { const n = this.data && this.data.deskScale; return [1,2,3].includes(n) ? n : 1; },
+  deskMul()   { return (CONFIG.deskSize.desk[this.deskStep() - 1]) || 1; },
+  nameMul()   { return (CONFIG.deskSize.name[this.deskStep() - 1]) || 1; },
+  deskW()     { return Math.round(CONFIG.desk.width  * this.deskMul()); },
+  deskH()     { return Math.round(CONFIG.desk.height * this.deskMul()); },
 
   /** 사전 자리로 이미 정해진 학생 id 모음 */
   presetTakenIds() { return new Set(Object.values(this.data.preset)); },

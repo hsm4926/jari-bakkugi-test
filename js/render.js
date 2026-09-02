@@ -64,10 +64,17 @@ const Render = {
 
     this.grid();
     this.room();
+    document.documentElement.style.setProperty('--nametag-size', this.nametagSize() + 'px');
     this.groups();
     this.desks();
     this.cards_();
     View.applyZoom();
+  },
+
+  /** 이름표 글씨 크기 — 「책상 크기」 단계만큼 커집니다 */
+  nametagSize() {
+    const base = (CONFIG.nametag && CONFIG.nametag.fontSize) || 28;
+    return Math.round(base * State.nameMul());
   },
 
   /* ---------------- 격자 ---------------- */
@@ -139,7 +146,7 @@ const Render = {
     const layer = $('#deskLayer');
     layer.innerHTML = '';
     this.deskNodes = {};          // 책상id -> 화면 요소 (자리 번호를 켜고 끌 때 씁니다)
-    const dw = CONFIG.desk.width, dh = CONFIG.desk.height;
+    const dw = State.deskW(), dh = State.deskH();
 
     State.orderedDesks().forEach((dk, i) => {
       const g = State.group(dk.gid);
@@ -271,7 +278,7 @@ const Render = {
     this._avatarImgs = [];
     if (!State.data.isShuffled) return;
 
-    const dh = CONFIG.desk.height, dw = CONFIG.desk.width;
+    const dh = State.deskH(), dw = State.deskW();
     const students = State.data.students;
 
     State.orderedDesks().forEach(dk => {
@@ -365,7 +372,7 @@ const Render = {
   moveCard(deskId, x, y, ms) {
     const c = this.cards[deskId];
     if (!c) return;
-    const p = View.place(x, y, CONFIG.desk.width, CONFIG.desk.height);
+    const p = View.place(x, y, State.deskW(), State.deskH());
     c.root.style.transition = ms ? `transform ${ms}ms cubic-bezier(.4,.05,.35,1)` : 'none';
     c.root.style.transform = `translate(${p.x}px, ${p.y}px)`;
   },
@@ -391,7 +398,7 @@ const Render = {
 
   /** 책상 한가운데 좌표 */
   deskCenter(dk) {
-    const w = CONFIG.desk.width, h = CONFIG.desk.height;
+    const w = State.deskW(), h = State.deskH();
     const p = View.place(dk.x, dk.y, w, h);
     return { x: p.x + w / 2, y: p.y + h / 2 };
   },

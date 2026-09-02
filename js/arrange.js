@@ -106,8 +106,8 @@ const Arrange = {
     if (!dg.moved || !dk) { Render.moveCard(dg.deskId, dk.x, dk.y, 0); return; }
 
     const p = View.toStage(e.clientX, e.clientY);
-    const target = this._deskAt(p.x - dg.dx + CONFIG.desk.width / 2,
-                               p.y - dg.dy + CONFIG.desk.height / 2);
+    const target = this._deskAt(p.x - dg.dx + State.deskW() / 2,
+                               p.y - dg.dy + State.deskH() / 2);
 
     if (!target || target.id === dg.deskId) {
       // 제자리로 돌아갑니다
@@ -138,7 +138,7 @@ const Arrange = {
 
   /** 교실 좌표 위에 있는 책상 찾기 */
   _deskAt(x, y) {
-    const w = CONFIG.desk.width, h = CONFIG.desk.height;
+    const w = State.deskW(), h = State.deskH();
     // 뒤에 그려진 것부터 찾아야 겹쳤을 때 «위에 있는 것» 이 잡힙니다
     const list = State.data.desks.slice().reverse();
     return list.find(dk => x >= dk.x && x <= dk.x + w && y >= dk.y && y <= dk.y + h) || null;

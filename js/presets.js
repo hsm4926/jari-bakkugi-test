@@ -33,6 +33,7 @@ const Presets = {
       groups: d.groups,
       desks: d.desks,
       useGroups: d.useGroups !== false,
+      deskScale: d.deskScale || 1,   // 「책상 크기」 단계
       students: d.students,
       preset: d.preset,          // 미리 정해둔 자리
       assignment: d.assignment,  // 지금 앉아 있는 자리 (섞은 결과)
@@ -91,6 +92,7 @@ const Presets = {
     d.groups    = s.groups    || [];
     d.desks     = s.desks     || [];
     d.useGroups = s.useGroups !== false;
+    d.deskScale = [1, 2, 3].includes(s.deskScale) ? s.deskScale : 1;
     d.students  = s.students  || [];
     d.preset    = s.preset    || {};
 

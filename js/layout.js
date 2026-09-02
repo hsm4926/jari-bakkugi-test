@@ -15,7 +15,7 @@ const Layout = {
 
   /** 모둠 블록 하나의 크기 */
   blockSize(seats) {
-    const dw = CONFIG.desk.width, dh = CONFIG.desk.height;
+    const dw = State.deskW(), dh = State.deskH();
     const cols = this.colsFor(seats);
     const rows = Math.ceil(seats / cols);
     const gapX = 12, gapY = 30;   // gapY 는 의자 자리까지 고려한 간격
@@ -102,14 +102,14 @@ const Layout = {
         const c = si % blk.cols;
         // 마지막 줄에 책상이 덜 찼으면 모둠 안에서 가운데로 모아줍니다
         const inRow = Math.min(blk.cols, seatsPerGroup - r * blk.cols);
-        const rowW = inRow * CONFIG.desk.width + (inRow - 1) * blk.gapX;
+        const rowW = inRow * State.deskW() + (inRow - 1) * blk.gapX;
         const offX = (blk.w - rowW) / 2;
         desks.push({
           id: uid('dk'),
           gid: group.id,
           no: si + 1,
-          x: S(bx + offX + c * (CONFIG.desk.width + blk.gapX)),
-          y: S(by + r * (CONFIG.desk.height + blk.gapY)),
+          x: S(bx + offX + c * (State.deskW() + blk.gapX)),
+          y: S(by + r * (State.deskH() + blk.gapY)),
         });
       }
     }
@@ -127,7 +127,7 @@ const Layout = {
   buildPlain(nDesks, roomW, roomH) {
     const g = CONFIG.classroom.grid;
     const S = (v) => snap(v, g);
-    const dw = CONFIG.desk.width, dh = CONFIG.desk.height;
+    const dw = State.deskW(), dh = State.deskH();
     const n = Math.max(1, nDesks);
 
     /* --- 칠판·사물함은 모둠 교실과 같은 자리 --- */

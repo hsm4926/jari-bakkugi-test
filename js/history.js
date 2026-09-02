@@ -34,7 +34,7 @@ const History = {
     return JSON.stringify({
       room: d.room, board: d.board, lockers: d.lockers,
       groups: d.groups, desks: d.desks, useGroups: d.useGroups,
-      preset: d.preset,
+      preset: d.preset, deskScale: d.deskScale || 1,
     });
   },
 
@@ -94,6 +94,7 @@ const History = {
     if (Editor.mode) Editor.select(null);
     Editor.refreshSexCount();
     Editor.refreshSnapBtn();
+    Editor.refreshDeskSize();
     Panel.refreshCounts();
     Panel.syncFromState();
     State.save();

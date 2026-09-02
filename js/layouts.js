@@ -214,7 +214,9 @@ const Layouts = {
       if (p) {
         row.title = cur ? '지금 화면에 깔린 배치입니다' : '누르면 이 배치를 불러옵니다';
         row.addEventListener('click', (e) => {
-          if (e.target.closest('.slot-btns')) return;
+          // ★ 빼는 것은 «버튼 세 개» 뿐입니다. 버튼 «줄» 을 통째로 빼면
+          //   버튼 사이 빈 자리가 칸의 아래 3분의 1인데 그곳이 죽어 버립니다.
+          if (e.target.closest('.slot-btns .btn')) return;
           this.load(i);
         });
       }

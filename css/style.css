@@ -792,8 +792,7 @@ body.show-sex .desk.sex-g .sex-no{
 .slot-item:not(.empty):hover{background:#453a51; border-color:var(--accent)}
 .slot-item:not(.empty):hover .slot-name{color:var(--accent)}
 .slot-item:not(.empty):active{background:#4d4159}
-/* 아래 버튼들은 각자 제 일을 하므로 «칸 전체 누르기» 에 딸려 들어가지 않습니다 */
-.slot-btns{cursor:default}
+/* 버튼 «세 개» 만 제 일을 합니다. 버튼 사이 빈 자리는 칸의 일부라 불러오기가 됩니다. */
 
 /* ★ 지금 화면에 깔린 배치와 «똑같은» 칸에는 노란 불이 들어옵니다.
    («번호 동그라미» 자체가 켜집니다 — 작은 점보다 멀리서도 눈에 띕니다) */
