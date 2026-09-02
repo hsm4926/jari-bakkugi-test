@@ -4,15 +4,15 @@
 <meta charset="utf-8">
 <meta name="theme-color" content="#2c2434">
 <meta name="description" content="초등학교 교실용 자리 바꾸기 프로그램. 알을 깨서 한 명씩 자리를 공개합니다.">
-<link rel="manifest" href="manifest.webmanifest?v=1.13.0-0902-222912">
-<link rel="apple-touch-icon" href="icons/icon-180.png?v=1.13.0-0902-222912">
+<link rel="manifest" href="manifest.webmanifest?v=1.13.0-0902-224643">
+<link rel="apple-touch-icon" href="icons/icon-180.png?v=1.13.0-0902-224643">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="자리 바꾸기">
 <script>window.__JARI_TEST=true;</script>
 <title>[테스트] 우리 반 자리 바꾸기</title>
-<link rel="icon" href="assets/sprites/desk-icon.png?v=1.13.0-0902-222912">
-<link rel="stylesheet" href="css/fonts.css?v=1.13.0-0902-222912">
-<link rel="stylesheet" href="css/style.css?v=1.13.0-0902-222912">
+<link rel="icon" href="assets/sprites/desk-icon.png?v=1.13.0-0902-224643">
+<link rel="stylesheet" href="css/fonts.css?v=1.13.0-0902-224643">
+<link rel="stylesheet" href="css/style.css?v=1.13.0-0902-224643">
 <style>
   .tb-test{
     position:fixed; right:14px; bottom:12px; z-index:1000; pointer-events:none;
@@ -35,9 +35,9 @@
 <div id="startCover">
   <div class="sc-box">
     <div class="sc-cast">
-      <img src="assets/sprites/student/boy1-3.png?v=1.13.0-0902-222912" alt="">
-      <img src="assets/sprites/egg/01.png?v=1.13.0-0902-222912" class="sc-egg" alt="">
-      <img src="assets/sprites/student/girl1-1.png?v=1.13.0-0902-222912" alt="">
+      <img src="assets/sprites/student/boy1-3.png?v=1.13.0-0902-224643" alt="">
+      <img src="assets/sprites/egg/01.png?v=1.13.0-0902-224643" class="sc-egg" alt="">
+      <img src="assets/sprites/student/girl1-1.png?v=1.13.0-0902-224643" alt="">
     </div>
     <div class="sc-title">우리 반 자리 바꾸기</div>
     <div class="sc-ver" id="scVer"></div>
@@ -50,16 +50,12 @@
 <!-- ===================== 상단 툴바 ===================== -->
 <header id="toolbar">
   <div class="tb-left">
-    <img class="tb-icon" src="assets/sprites/desk-icon.png?v=1.13.0-0902-222912" alt="">
+    <img class="tb-icon" src="assets/sprites/desk-icon.png?v=1.13.0-0902-224643" alt="">
     <span class="tb-title">우리 반 자리 바꾸기</span>
     <span class="tb-ver" id="tbVer"></span>
   </div>
 
   <div class="tb-center">
-    <!-- 섞은 결과가 있을 때만 보입니다. 모두 공개되면 빛납니다. -->
-    <button id="btnSaveLayout" class="btn btn-sm btn-ghost hidden"
-            title="지금 이 자리 배치를 칸에 저장합니다 — 자리를 모두 공개한 뒤에 됩니다">배치 저장</button>
-
     <!-- 수업 중 실제로 누르는 «핵심» 버튼들. 상자로 묶어 눈에 먼저 들어오게 합니다. -->
     <div class="tb-core">
       <button id="btnShuffle" class="btn btn-main">자리 섞기</button>
@@ -80,7 +76,7 @@
       <button id="btnZoomIn" class="btn btn-icon" title="확대">＋</button>
       <button id="btnZoomFit" class="btn btn-icon" title="화면에 맞추기">⤢</button>
     </div>
-    <button id="btnArrange" class="btn" title="지금 앉은 자리를 보고 손으로 고칩니다">현재 배치</button>
+    <button id="btnArrange" class="btn" title="지금 앉은 자리를 보고 고치거나, 배치를 저장·불러옵니다">배치 관리</button>
     <button id="btnEdit" class="btn">교실 편집</button>
     <button id="btnPanel" class="btn">설정</button>
     <button id="btnFull" class="btn btn-icon" title="전체 화면 (F11)">⛶</button>
@@ -129,13 +125,11 @@
   </div>
 </div>
 
-<!-- 저장 칸 고르기 — «＋ 배치 저장» 을 누르면 툴바 아래로 내려옵니다 -->
-<div id="slotPicker" class="hidden"></div>
-
-<!-- 저장해 둔 배치 목록 — «현재 배치» 모드에서 뜹니다. 제목을 끌면 옮겨집니다. -->
+<!-- 배치 목록 — «배치 관리» 모드에서 뜹니다. 여기서 저장·불러오기를 모두 합니다.
+     제목을 끌면 창이 옮겨집니다. -->
 <div id="slotPanel" class="hidden">
   <div class="sp-head" id="spHead">
-    <span class="sp-name">저장해 둔 배치</span>
+    <span class="sp-name">배치 목록</span>
     <button id="spFold" class="btn btn-icon" title="접기 / 펴기">▾</button>
   </div>
   <div class="sp-body" id="slotList"></div>
@@ -409,23 +403,23 @@
 
 <div id="toast" class="hidden"></div>
 
-<script src="version.js?v=1.13.0-0902-222912"></script>
-<script src="config.js?v=1.13.0-0902-222912"></script>
-<script src="js/util.js?v=1.13.0-0902-222912"></script>
-<script src="js/audio.js?v=1.13.0-0902-222912"></script>
-<script src="js/state.js?v=1.13.0-0902-222912"></script>
-<script src="js/seats.js?v=1.13.0-0902-222912"></script>
-<script src="js/history.js?v=1.13.0-0902-222912"></script>
-<script src="js/layouts.js?v=1.13.0-0902-222912"></script>
-<script src="js/arrange.js?v=1.13.0-0902-222912"></script>
-<script src="js/layout.js?v=1.13.0-0902-222912"></script>
-<script src="js/render.js?v=1.13.0-0902-222912"></script>
-<script src="js/editor.js?v=1.13.0-0902-222912"></script>
-<script src="js/shuffle.js?v=1.13.0-0902-222912"></script>
-<script src="js/panel.js?v=1.13.0-0902-222912"></script>
-<script src="js/presets.js?v=1.13.0-0902-222912"></script>
-<script src="js/main.js?v=1.13.0-0902-222912"></script>
-<div class="tb-test">테스트판 0902-222912</div>
+<script src="version.js?v=1.13.0-0902-224643"></script>
+<script src="config.js?v=1.13.0-0902-224643"></script>
+<script src="js/util.js?v=1.13.0-0902-224643"></script>
+<script src="js/audio.js?v=1.13.0-0902-224643"></script>
+<script src="js/state.js?v=1.13.0-0902-224643"></script>
+<script src="js/seats.js?v=1.13.0-0902-224643"></script>
+<script src="js/history.js?v=1.13.0-0902-224643"></script>
+<script src="js/layouts.js?v=1.13.0-0902-224643"></script>
+<script src="js/arrange.js?v=1.13.0-0902-224643"></script>
+<script src="js/layout.js?v=1.13.0-0902-224643"></script>
+<script src="js/render.js?v=1.13.0-0902-224643"></script>
+<script src="js/editor.js?v=1.13.0-0902-224643"></script>
+<script src="js/shuffle.js?v=1.13.0-0902-224643"></script>
+<script src="js/panel.js?v=1.13.0-0902-224643"></script>
+<script src="js/presets.js?v=1.13.0-0902-224643"></script>
+<script src="js/main.js?v=1.13.0-0902-224643"></script>
+<div class="tb-test">테스트판 0902-224643</div>
 <script>
 /* 서비스 워커 등록 — 인터넷이 끊겨도 열리게 해 줍니다. 실패해도 프로그램은 그대로 돌아갑니다. */
 if ('serviceWorker' in navigator) {

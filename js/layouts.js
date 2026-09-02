@@ -149,7 +149,7 @@ const Layouts = {
     Render.setWobble(false);
     State.save();
     this.render();
-    Arrange.refreshSaveBtn();
+    Arrange.refresh();
     banner(`${p.name} — 저장해 둔 자리입니다`, 3200);
     toast(lost ? `${ok.length}명을 되살렸습니다 (${lost}명은 빠졌습니다)`
                : `${ok.length}명의 자리를 되살렸습니다`);
@@ -189,38 +189,13 @@ const Layouts = {
   },
 
   /* ============================================================
-     화면 두 곳을 그립니다
-       ① 저장 칸 고르기 (툴바 아래로 내려오는 5칸)
-       ② 떠다니는 목록 창 (현재 배치 모드에서)
+     떠다니는 «배치 목록» 창을 그립니다.
+     저장·불러오기·이름·삭제가 전부 여기 있습니다 —
+     v1.13.0 에서 툴바의 «배치 저장» 버튼을 없애고 이리로 모았습니다.
+     («배치 관리» 로 들어오면 어차피 자리가 전부 공개되므로,
+      «공개된 뒤에만 저장» 이라는 규칙이 저절로 지켜집니다)
      ============================================================ */
-  render() {
-    this._renderPicker();
-    this._renderPanel();
-  },
-
-  _renderPicker() {
-    const box = $('#slotPicker');
-    if (!box) return;
-    const now = this.nowKey();
-    box.innerHTML = '';
-    box.appendChild(el('div', { class: 'sp-title', text: '어느 칸에 저장할까요?' }));
-
-    this.list().forEach((p, i) => {
-      const cur = !!(p && now && this._key(p.pairs) === now);
-      const row = el('button', {
-        class: 'slot' + (p ? ' used' : '') + (cur ? ' current' : ''),
-        title: cur ? '지금 화면의 배치와 같은 칸입니다' : '',
-        onclick: () => { if (this.save(i)) this.closePicker(); },
-      });
-      row.appendChild(el('span', { class: 'slot-no', text: (i + 1) }));
-      row.appendChild(el('span', { class: 'slot-name', text: p ? p.name : '비어 있음' }));
-      if (cur) row.appendChild(el('span', { class: 'slot-now', text: '지금' }));
-      row.appendChild(el('span', { class: 'slot-sub', text: p ? this.summary(p) : '' }));
-      box.appendChild(row);
-    });
-    box.appendChild(el('p', { class: 'hint',
-      text: '이미 들어 있는 칸을 고르면 덮어쓸지 먼저 물어봅니다.' }));
-  },
+  render() { this._renderPanel(); },
 
   _renderPanel() {
     const box = $('#slotList');
@@ -231,42 +206,34 @@ const Layouts = {
     this.list().forEach((p, i) => {
       const cur = !!(p && now && this._key(p.pairs) === now);
       const row = el('div', { class: 'slot-item' + (p ? '' : ' empty') + (cur ? ' current' : '') });
+
+      // 윗줄(번호 + 이름)을 누르면 «불러오기». 빈 칸은 누를 것이 없습니다.
       const head = el('button', {
         class: 'slot-open',
         title: cur ? '지금 화면에 깔린 배치입니다'
-             : p   ? '이 배치를 불러옵니다' : '비어 있습니다',
-        onclick: () => p ? this.load(i) : toast('비어 있는 칸입니다'),
+             : p   ? '이 배치를 불러옵니다' : '아직 비어 있습니다',
+        onclick: () => { if (p) this.load(i); },
       });
       head.appendChild(el('span', { class: 'slot-no', text: (i + 1) }));
       head.appendChild(el('span', { class: 'slot-name', text: p ? p.name : '비어 있음' }));
       if (cur) head.appendChild(el('span', { class: 'slot-now', text: '지금' }));
       row.appendChild(head);
 
+      const btns = el('div', { class: 'slot-btns' });
       if (p) {
         row.appendChild(el('div', { class: 'slot-sub', text: this.summary(p) }));
-        const btns = el('div', { class: 'slot-btns' });
         btns.appendChild(el('button', { class: 'btn btn-sm', text: '이름',
-          onclick: () => this.rename(i) }));
+          title: '이 배치의 이름을 바꿉니다', onclick: () => this.rename(i) }));
+        btns.appendChild(el('button', { class: 'btn btn-sm', text: '덮어쓰기',
+          title: '지금 자리로 이 칸을 덮어씁니다', onclick: () => this.save(i) }));
         btns.appendChild(el('button', { class: 'btn btn-sm btn-danger', text: '삭제',
-          onclick: () => this.remove(i) }));
-        row.appendChild(btns);
+          title: '이 칸을 비웁니다', onclick: () => this.remove(i) }));
+      } else {
+        btns.appendChild(el('button', { class: 'btn btn-sm slot-save', text: '저장하기',
+          title: '지금 자리를 이 칸에 저장합니다', onclick: () => this.save(i) }));
       }
+      row.appendChild(btns);
       box.appendChild(row);
     });
-  },
-
-  openPicker() {
-    if (this._blocked()) return;
-    this._renderPicker();
-    $('#slotPicker').classList.remove('hidden');
-    Sound.play('click');
-  },
-
-  closePicker() { $('#slotPicker').classList.add('hidden'); },
-
-  togglePicker() {
-    if ($('#slotPicker').classList.contains('hidden')) { this.openPicker(); return; }
-    this.closePicker();
-    Sound.play('click');   // closePicker 자체는 조용합니다 (다른 곳에서도 부르므로)
   },
 };

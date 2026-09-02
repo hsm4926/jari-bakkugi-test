@@ -87,7 +87,7 @@ const Shuffle = {
     document.body.classList.remove('busy');
     State.save();
     Panel.refreshCounts();
-    Arrange.refreshSaveBtn();
+    Arrange.refresh();
   },
 
   /* ============================================================
@@ -126,7 +126,7 @@ const Shuffle = {
     State.save();
     this._pending--;
     this.checkAllRevealed();
-    Arrange.refreshSaveBtn();
+    Arrange.refresh();
   },
 
   /* ============================================================
@@ -184,7 +184,7 @@ const Shuffle = {
 
     State.save();
     this.checkAllRevealed();
-    Arrange.refreshSaveBtn();
+    Arrange.refresh();
   },
 
   reset() {
@@ -198,7 +198,7 @@ const Shuffle = {
     Render.setWobble(true);
     banner('다시 덮었습니다', 1800);   // 핵심 5개는 버튼 소리를 내지 않습니다
     State.save();
-    Arrange.refreshSaveBtn();
+    Arrange.refresh();
   },
 
   /* ============================================================

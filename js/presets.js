@@ -116,7 +116,7 @@ const Presets = {
     if (roomChanged) View.fit();  // 교실 크기가 달라졌으면 화면에 다시 맞춥니다
     Panel.syncFromState();
     Layouts.render();
-    Arrange.refreshSaveBtn();
+    Arrange.refresh();
     State.save();
     toast(`「${p.name}」 을(를) 불러왔습니다`);
     banner(d.isShuffled ? `${p.name} — 저장해 둔 자리입니다`

@@ -380,7 +380,7 @@ function boot() {
   Secret.init();
   History.refresh();
   Layouts.render();
-  Arrange.refreshSaveBtn();
+  Arrange.refresh();
   Arrange.initPanelDrag();
   wireEvents();
   StartCover.init();
@@ -403,7 +403,6 @@ function wireEvents() {
   $('#btnRevealNow').onclick  = () => Shuffle.revealNow();
   $('#btnReset').onclick     = () => Shuffle.reset();
   $('#btnFlip').onclick      = () => View.toggleFlip();
-  $('#btnSaveLayout').onclick = () => Layouts.togglePicker();
   $('#btnArrange').onclick   = () => Arrange.toggle();
   $('#spFold').onclick       = () => Arrange.toggleFold();
   $('#btnEdit').onclick      = () => { Sound.play('click'); Editor.toggle(); };
@@ -478,7 +477,7 @@ function wireEvents() {
      책상·모둠을 잡지 않았다면 화면을 옮길 수 있습니다.
      교실 바깥 여백에서도 끌 수 있도록 viewport 에 답니다. */
   $('#viewport').addEventListener('pointerdown', (e) => {
-    // «현재 배치» 모드에서 학생을 잡았으면 그쪽이 처리합니다
+    // «배치 관리» 모드에서 학생을 잡았으면 그쪽이 처리합니다
     if (Arrange.onPointerDown(e)) return;
     // 편집 중이고 책상·모둠·칠판·사물함을 잡았으면 그쪽이 처리합니다
     if (Editor.onPointerDown(e)) return;
@@ -507,9 +506,6 @@ function wireEvents() {
   // 팝업 바깥을 누르면 닫기
   document.addEventListener('pointerdown', (e) => {
     if (!e.target.closest('#picker') && !e.target.closest('.desk')) Picker.close();
-    if (!e.target.closest('#slotPicker') && !e.target.closest('#btnSaveLayout')) {
-      Layouts.closePicker();
-    }
   }, true);
 
   window.addEventListener('resize', () => View.applyZoom());
@@ -544,7 +540,6 @@ function wireEvents() {
     switch (e.key) {
       case 'Escape':
         if (Alert.isOpen()) Alert.close();
-        else if (!$('#slotPicker').classList.contains('hidden')) Layouts.closePicker();
         else if (!$('#picker').classList.contains('hidden')) Picker.close();
         else if (Arrange.on) Arrange.exit();
         else if (Editor.mode) Editor.exit();

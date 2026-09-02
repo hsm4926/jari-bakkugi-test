@@ -1,5 +1,5 @@
 /* ============================================================
-   «현재 배치» 모드 — 지금 앉은 자리를 보고 손으로 고치기
+   «배치 관리» 모드 — 지금 앉은 자리를 보고 손으로 고치기
    ------------------------------------------------------------
    섞어서 나온 결과가 마음에 안 들 때(짝을 떼어 놓고 싶다든지)
    학생을 끌어다 자리를 바꿉니다.
@@ -31,7 +31,6 @@ const Arrange = {
     this.on = true;
     document.body.classList.add('arranging');
     $('#btnArrange').classList.add('active');
-    Layouts.closePicker();
 
     // 이 모드에서는 아직 덮여 있는 알도 전부 열어 보여 줍니다
     // (실제 «공개» 상태를 바꾸는 것이라, 나가도 그대로 열려 있습니다)
@@ -134,7 +133,7 @@ const Arrange = {
     Render.setWobble(false);
     Sound.play('page');        // 자리를 «옮겨 놓는» 소리 — 설정 창과 같은 소리입니다
     State.save();
-    Arrange.refreshSaveBtn();
+    Arrange.refresh();
   },
 
   /** 교실 좌표 위에 있는 책상 찾기 */
@@ -146,19 +145,14 @@ const Arrange = {
   },
 
   /* ============================================================
-     저장 버튼 — 섞은 결과가 있을 때만 보이고, 다 공개되면 빛납니다
+     자리가 바뀌었을 때 목록을 다시 그립니다.
+     («지금 배치» 노란 불이 따라 옮겨 가야 합니다)
+
+     v1.13.0 이전에는 툴바에 «배치 저장» 버튼이 따로 있어서
+     그 버튼을 보이고 숨기는 일도 여기서 했습니다. 지금은 저장이
+     «배치 관리» 안으로 들어와 버튼 자체가 없어졌습니다.
      ============================================================ */
-  refreshSaveBtn() {
-    const btn = $('#btnSaveLayout');
-    if (!btn) return;
-    const can = Layouts.canSave();
-    btn.classList.toggle('hidden', !can);
-    // 아직 다 공개되지 않았으면 눌렀을 때 알려 줍니다 (Layouts._blocked).
-    // 예전처럼 버튼을 빛나게 하지는 않습니다 — 툴바에 노란 것이 늘면 어지럽습니다.
-    if (!can || !Layouts.allRevealed()) Layouts.closePicker();
-    // 자리가 바뀌면 «지금 배치» 노란 불도 따라 옮겨 가야 합니다
-    Layouts.render();
-  },
+  refresh() { Layouts.render(); },
 
   /* ============================================================
      떠다니는 목록 창 — 접기 · 끌어서 옮기기
@@ -174,7 +168,7 @@ const Arrange = {
   _placePanel() {
     const n = $('#slotPanel');
     const s = (State.data.settings || {}).slotPanel;
-    const w = 232, h = 60;
+    const w = 258, h = 60;   // ← #slotPanel 의 width 와 같게 유지할 것
     let x = (s && typeof s.x === 'number') ? s.x : (window.innerWidth - w - 24);
     let y = (s && typeof s.y === 'number') ? s.y : 130;
     n.style.left = clamp(x, 4, Math.max(4, window.innerWidth  - w)) + 'px';

@@ -6,7 +6,7 @@ const Panel = {
   /* ⚠️ «설정» 버튼은 켜져도 노랗게 바꾸지 않습니다.
      열면 패널이 그 버튼을 곧바로 덮어서 보이지도 않는데,
      닫는 찰나에만 노랗게 번쩍여서 오히려 눈에 거슬립니다.
-     (「교실 편집」·「현재 배치」 는 화면이 그대로 보이므로 켜진 표시를 합니다) */
+     (「교실 편집」·「배치 관리」 는 화면이 그대로 보이므로 켜진 표시를 합니다) */
   open(tab) {
     $('#panel').classList.remove('hidden');
     if (tab) this.showTab(tab);
@@ -311,7 +311,7 @@ const Panel = {
         Render.all();
         this.syncFromState();
         Layouts.render();
-        Arrange.refreshSaveBtn();
+        Arrange.refresh();
         Sound.setOn(State.data.settings.sound);
         Sound.setMaster(State.data.settings.volume);
         toast('설정을 불러왔습니다');
@@ -330,7 +330,7 @@ const Panel = {
     Render.all();
     this.syncFromState();
     Layouts.render();
-    Arrange.refreshSaveBtn();
+    Arrange.refresh();
     toast('처음 상태로 되돌렸습니다');
   },
 };

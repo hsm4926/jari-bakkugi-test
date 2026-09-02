@@ -96,7 +96,7 @@ img{image-rendering:pixelated}
 
 /* ---------------- 핵심 버튼 묶음 ----------------
    수업 중에 실제로 누르는 것은 이 다섯 개뿐입니다.
-   («현재 배치»·«교실 편집»·«설정» 은 준비할 때 쓰는 버튼입니다)
+   («배치 관리»·«교실 편집»·«설정» 은 준비할 때 쓰는 버튼입니다)
    그래서 이 다섯 개만 상자로 감싸 한눈에 구분되게 합니다. */
 /* ★ «부드러운 판» — 선이 아니라 «면과 그림자» 로만 구분합니다.
    두 번 갈아엎고 나온 답입니다.
@@ -722,7 +722,7 @@ body.show-sex .desk.sex-g .sex-no{
    그대로 두면 위쪽 버튼이 두 줄로 접혀 글씨가 잘려 보입니다.
    ============================================================ */
 /* ① 조금 좁음 — 글씨와 여백을 줄여 한 줄을 지킵니다 */
-@media (max-width:1820px){
+@media (max-width:1710px){
   .tb-left,.tb-right{min-width:0}
   .tb-title{font-size:18px}
   .tb-center{gap:7px}
@@ -736,7 +736,7 @@ body.show-sex .desk.sex-g .sex-no{
   .eb-hint{display:none}          /* 힌트보다 버튼이 우선입니다 */
 }
 /* ② 더 좁음 — 없어도 되는 것부터 치웁니다 */
-@media (max-width:1560px){
+@media (max-width:1450px){
   .tb-title{display:none}         /* 제목은 없어도 되는 정보입니다 (아이콘·버전은 남깁니다) */
   .zoom-box{display:none}         /* 확대·축소는 +/- 키와 휠로도 됩니다 */
   .tb-center .btn,.tb-right .btn{font-size:14px; padding:7px 9px}
@@ -745,7 +745,7 @@ body.show-sex .desk.sex-g .sex-no{
 }
 /* ③ 여기서부터는 한 줄에 도저히 안 들어갑니다.
    억지로 밀어 넣어 겹치게 두지 말고, 핵심 버튼 묶음을 통째로 아랫줄로 내립니다. */
-@media (max-width:1180px){
+@media (max-width:1070px){
   .tb-left{flex:1 1 auto}
   .tb-right{flex:0 0 auto}
   .tb-center{order:3; flex:1 0 100%}
@@ -754,51 +754,10 @@ body.show-sex .desk.sex-g .sex-no{
 /* ============================================================
    지금 자리 배치 저장 (5칸)
    ============================================================ */
-/* 저장 버튼 — 「⇅ 뒤집기」 와 «똑같은» 크기·색입니다.
-   예전에는 다 공개되면 노랗게 빛났는데, 툴바에 노란 것이 셋(자리 섞기·저장·경우에 따라 더)이
-   되어 눈이 어지러웠습니다. 지금은 조용히 있고, 아직 안 될 때는 눌러 보면 알려 줍니다. */
-#btnSaveLayout{align-self:center; padding:7px 11px}
-
-/* 툴바 아래로 내려오는 «어느 칸에 저장할까요?» */
-#slotPicker{
-  /* 막대가 두 줄이 되면 그만큼 아래에서 시작해야 가려지지 않습니다 */
-  position:absolute; top:calc(var(--toolbar-h,60px) + 4px); left:50%; transform:translateX(-50%);
-  z-index:45; width:min(460px, 92vw);
-  background:#2c2434; border:3px solid #5c4d6b; border-radius:12px;
-  box-shadow:0 14px 40px rgba(0,0,0,.55);
-  padding:12px;
-  animation:slotDrop .18s ease;
-}
-@keyframes slotDrop{from{opacity:0; transform:translateX(-50%) translateY(-8px)}
-                    to  {opacity:1; transform:translateX(-50%) translateY(0)}}
-#slotPicker .sp-title{
-  font-family:'NeoDunggeunmo',sans-serif; font-size:16px; color:var(--accent);
-  margin-bottom:9px; text-align:center;
-}
-#slotPicker .hint{margin:9px 2px 0; text-align:center}
-
-.slot{
-  display:flex; align-items:center; gap:10px; width:100%;
-  padding:9px 11px; margin-bottom:6px;
-  background:#3b3145; border:2px solid #4b3f58; border-radius:8px;
-  color:var(--ink); font-family:inherit; font-size:15px; cursor:pointer;
-  text-align:left;
-}
-.slot:hover{background:#4a3e58; border-color:var(--accent)}
-.slot.used{border-color:#6d5d7c}
-.slot.current{border-color:var(--accent); background:#463a52}
-.slot-no{
-  flex:none; width:26px; height:26px; border-radius:50%;
-  display:flex; align-items:center; justify-content:center;
-  background:#241d2b; border:2px solid #5c4d6b;
-  font-family:'NeoDunggeunmo',sans-serif; font-size:14px; color:var(--accent);
-}
-.slot-name{flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
-.slot-sub{font-size:12px; color:var(--ink-dim); white-space:nowrap}
-
-/* ---------------- 떠다니는 목록 창 ---------------- */
+/* ---------------- 떠다니는 «배치 목록» 창 ----------------
+   저장·불러오기·이름·삭제가 전부 여기 있습니다 (v1.13.0). */
 #slotPanel{
-  position:fixed; z-index:46; width:232px;
+  position:fixed; z-index:46; width:258px;
   background:#2c2434; border:3px solid #5c4d6b; border-radius:12px;
   box-shadow:0 12px 34px rgba(0,0,0,.5);
   overflow:hidden;
@@ -821,7 +780,11 @@ body.show-sex .desk.sex-g .sex-no{
   border:2px solid #4b3f58; border-radius:8px; padding:6px 7px; margin-bottom:6px;
   background:#332a3d;
 }
-.slot-item.empty{opacity:.5}
+/* 빈 칸도 «저장하기» 버튼이 있으므로 통째로 흐리게 하지 않습니다.
+   이름 글씨만 옅게 해서 «아직 비었다» 를 알립니다. */
+.slot-item.empty .slot-no{opacity:.5}
+.slot-item.empty .slot-name{color:var(--ink-dim)}
+.slot-item.empty .slot-open{cursor:default}
 .slot-item:last-child{margin-bottom:0}
 /* 마우스를 올리면 «칸 전체» 가 밝아집니다 (예전엔 이름 글자만 바뀌어 잘 안 보였습니다) */
 .slot-item:not(.empty){transition:background .12s, border-color .12s}
@@ -847,11 +810,14 @@ body.show-sex .desk.sex-g .sex-no{
 }
 .slot-item:not(.empty) .slot-open:hover .slot-name{color:var(--accent)}
 .slot-item .slot-sub{margin:4px 0 0 34px; white-space:normal; line-height:1.4}
-.slot-btns{display:flex; gap:5px; margin:6px 0 0 34px}
+.slot-btns{display:flex; flex-wrap:wrap; gap:5px; margin:7px 0 0 34px}
 .slot-btns .btn{font-size:12px; padding:3px 8px}
+/* 빈 칸의 «저장하기» — 여기서 할 일은 이것뿐이라 눈에 띄게 둡니다 */
+.slot-save{width:100%; text-align:center}
+.slot-item.empty .slot-btns{margin-left:0}   /* 빈 칸은 «저장하기» 하나뿐이라 칸 전체 너비로 */
 
 /* ============================================================
-   «현재 배치» 모드 — 학생을 끌어서 자리 바꾸기
+   «배치 관리» 모드 — 학생을 끌어서 자리 바꾸기
    ============================================================ */
 body.arranging #cardLayer{pointer-events:none}
 body.arranging .card{pointer-events:auto; cursor:grab}
@@ -861,7 +827,7 @@ body.arranging .card.dragging{cursor:grabbing; z-index:20; filter:brightness(1.0
 body.arranging .desk.drop{
   box-shadow:0 5px 0 rgba(120,80,40,.45), 0 0 0 5px var(--accent);
 }
-/* ★ 지금이 «현재 배치» 상태라는 것을 한눈에.
+/* ★ 지금이 «배치 관리» 상태라는 것을 한눈에.
    교실 둘레를 노란 테를 둘러 평소 화면과 확실히 달라 보이게 합니다. */
 body.arranging #stage{
   box-shadow:0 18px 60px rgba(0,0,0,.55),
@@ -870,5 +836,5 @@ body.arranging #stage{
              0 0 34px 10px rgba(255,207,92,.26);
 }
 /* 위쪽 고정 딱지는 두지 않습니다 — 들어올 때 아래 큰 띠로 한 번 알려 주고,
-   그 뒤에는 «노란 테두리 + 노랗게 켜진 «현재 배치» 버튼» 으로 충분합니다.
+   그 뒤에는 «노란 테두리 + 노랗게 켜진 «배치 관리» 버튼» 으로 충분합니다.
    교실 위에 늘 떠 있는 글씨는 아이들 화면을 가립니다. */
