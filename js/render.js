@@ -151,13 +151,19 @@ const Render = {
         text: (g ? g.no + '-' : '') + (dk.no || (i + 1)),
       }));
 
-      // 사전 자리 정하기 모드일 때 보이는 이름
+      // 사전 자리 정하기 모드일 때 보이는 이름.
+      // 그 학생의 성별이 이 자리와 다르면 눈에 띄게 표시합니다 (막지는 않습니다)
       const sid = State.data.preset[dk.id];
       const stu = sid ? State.student(sid) : null;
+      const want = State.deskSex(dk);
+      const odd = stu && want && (stu.sex === 'g' ? 'g' : 'b') !== want;
       node.appendChild(el('div', {
-        class: 'desk-preset' + (stu ? '' : ' empty'),
+        class: 'desk-preset' + (stu ? '' : ' empty') + (odd ? ' bad' : ''),
         text: stu ? stu.name : '비어 있음',
       }));
+
+      // 남자 자리 · 여자 자리 딱지 (내용은 paintDeskSex() 가 정합니다)
+      node.appendChild(el('div', { class: 'sex-no' }));
 
       // 알에 붙는 자리 번호 (내용과 표시 여부는 seatNumbers() 가 정합니다)
       const badge = el('div', { class: 'seat-no' });
@@ -167,9 +173,38 @@ const Render = {
 
       layer.appendChild(node);
       this.deskNodes[dk.id] = node;
+      this.paintDeskSex(dk.id);
     });
 
     this.applyEditVisuals();
+  },
+
+  /* ============================================================
+     남자 자리 · 여자 자리 표시
+     ------------------------------------------------------------
+     책상 하나만 다시 칠합니다. 편집 중에 책상을 연달아 누를 때
+     교실 전체를 다시 그리면 눈에 띄게 버벅이기 때문입니다.
+     ============================================================ */
+  paintDeskSex(deskId) {
+    const node = this.deskNodes && this.deskNodes[deskId];
+    if (!node) return;
+    const want = State.deskSex(State.desk(deskId));
+
+    node.classList.toggle('sex-b', want === 'b');
+    node.classList.toggle('sex-g', want === 'g');
+
+    const badge = node.querySelector('.sex-no');
+    if (!badge) return;
+    // config.js 에서 끄면 편집할 때만 보입니다 (평소 교실 화면은 깔끔하게)
+    const always = !CONFIG.deskSex || CONFIG.deskSex.show !== false;
+    badge.textContent = want === 'g' ? '여' : '남';
+    badge.style.display = (want && (always || Editor.mode === 'sex')) ? '' : 'none';
+  },
+
+  /** 모든 책상의 남·여 딱지를 다시 칠합니다 (편집 모드가 바뀔 때) */
+  paintAllSex() {
+    if (!this.deskNodes) return;
+    for (const id in this.deskNodes) this.paintDeskSex(id);
   },
 
   /* ============================================================
@@ -209,6 +244,7 @@ const Render = {
     const mode = Editor.mode;   // null | 'layout' | 'preset'
     $$('.desk-no').forEach(n => n.style.display = mode === 'layout' ? '' : 'none');
     $$('.desk-preset').forEach(n => n.style.display = mode === 'preset' ? '' : 'none');
+    this.paintAllSex();
     this.seatNumbers();
   },
 

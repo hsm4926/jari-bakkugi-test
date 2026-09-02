@@ -90,3 +90,42 @@ function banner(msg, ms) {
   clearTimeout(bannerTimer);
   if (ms) bannerTimer = setTimeout(() => b.classList.add('hidden'), ms);
 }
+
+/* ============================================================
+   화면 한가운데에 뜨는 큰 알림
+   ------------------------------------------------------------
+   toast(아래쪽 작은 글씨)·banner(아래쪽 알약)와 달리 화면을 덮고
+   버튼을 누르기 전에는 사라지지 않습니다.
+   「자리가 모자라서 섞을 수 없다」처럼 그냥 넘어가면 안 되는 일에만 씁니다.
+   ============================================================ */
+const Alert = {
+
+  /**
+   * @param title  큰 제목 한 줄
+   * @param lines  설명 문장들 (배열)
+   * @param action {label, run} — 문제를 바로 고치러 갈 버튼. 없으면 닫기만 나옵니다.
+   */
+  show(title, lines, action) {
+    $('#alertTitle').textContent = title;
+
+    const box = $('#alertList');
+    box.innerHTML = '';
+    [].concat(lines || []).forEach(t => box.appendChild(el('li', { text: t })));
+
+    const go = $('#alertGo');
+    if (action) {
+      go.textContent = action.label;
+      go.onclick = () => { this.close(); action.run(); };
+      go.classList.remove('hidden');
+    } else {
+      go.classList.add('hidden');
+    }
+
+    $('#alert').classList.remove('hidden');
+    if (window.Sound) Sound.play('page');
+  },
+
+  close() { $('#alert').classList.add('hidden'); },
+
+  isOpen() { return !$('#alert').classList.contains('hidden'); },
+};

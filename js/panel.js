@@ -105,26 +105,41 @@ const Panel = {
     State.save();
   },
 
-  /* ---------------- 인원 / 자리 수 맞는지 확인 ---------------- */
+  /* ---------------- 인원 / 자리 수 맞는지 확인 ----------------
+     실제 계산은 seats.js 가 합니다. 여기서는 보여 주기만 합니다.
+     같은 내용이 «자리 섞기» 를 누를 때 화면 한가운데에도 뜹니다. */
   refreshCounts() {
-    const d = State.data;
-    const n = d.students.length, seats = d.desks.length;
-    $('#nameCount').textContent = n + '명';
+    const c = Seats.check();
+    $('#nameCount').textContent = c.students + '명';
 
     const warn = $('#countWarn');
-    if (!n || !seats) { warn.classList.add('hidden'); return; }
-    if (n === seats) {
-      warn.classList.add('hidden');
-    } else if (n > seats) {
-      warn.textContent = `학생 ${n}명, 자리 ${seats}개 — 자리가 ${n - seats}개 모자랍니다. `
-        + (State.useGroups() ? '교실 탭에서 모둠이나 책상을 늘려 주세요.'
-                             : '교실 탭에서 책상 수를 늘려 주세요.');
+    warn.innerHTML = '';
+    warn.classList.remove('bad');
+
+    if (!c.students || !c.seats) { warn.classList.add('hidden'); return; }
+
+    if (!c.ok) {
+      // 앉을 수 없는 사람이 생깁니다 — 섞기 자체가 막힙니다
+      warn.classList.add('bad');
+      Seats.problems(c).forEach(t => warn.appendChild(el('div', { text: t })));
       warn.classList.remove('hidden');
-    } else {
-      warn.textContent = `학생 ${n}명, 자리 ${seats}개 — 자리가 ${seats - n}개 남습니다. `
-        + `남는 자리는 빈 채로 둡니다.`;
-      warn.classList.remove('hidden');
+      return;
     }
+
+    if (c.spare > 0) {
+      warn.appendChild(el('div', {
+        text: `학생 ${c.students}명, 자리 ${c.seats}개 — 자리가 ${c.spare}개 남습니다. 남는 자리는 빈 채로 둡니다.`,
+      }));
+      if (c.usesSex) {
+        warn.appendChild(el('div', {
+          text: `(남자 자리 ${c.seatB} · 여자 자리 ${c.seatG} · 누구나 앉는 자리 ${c.seatFree})`,
+        }));
+      }
+      warn.classList.remove('hidden');
+      return;
+    }
+
+    warn.classList.add('hidden');
   },
 
   refreshSavedAt() {

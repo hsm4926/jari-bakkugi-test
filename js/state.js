@@ -116,6 +116,17 @@ const State = {
   /** 지금 교실이 모둠으로 묶여 있는지. 설정 화면에서 어떤 칸을 보여줄지 정할 때 씁니다. */
   useGroups() { return this.data.useGroups !== false; },
 
+  /**
+   * 이 책상이 누구 자리인지 알려 줍니다.
+   *   'b'  = 남학생만 앉는 자리
+   *   'g'  = 여학생만 앉는 자리
+   *   null = 누구나 앉는 자리 (아무것도 정하지 않은 보통 책상)
+   *
+   * 책상에 sex 항목 자체가 없는 경우(예전에 저장한 교실)도 있으므로
+   * 어디서든 이 함수를 거쳐서 읽습니다. dk.sex 를 직접 보지 마세요.
+   */
+  deskSex(dk) { return (dk && (dk.sex === 'b' || dk.sex === 'g')) ? dk.sex : null; },
+
   student(id) { return this.data.students.find(s => s.id === id); },
 
   /** 모둠 순서 → 책상 번호 순으로 정렬한 책상 목록 */

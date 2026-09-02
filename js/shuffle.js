@@ -20,33 +20,10 @@ const Shuffle = {
   /* ============================================================
      1) 누가 어느 자리에 앉을지 정하기
      ------------------------------------------------------------
-     · 무작위 모드   : 학생을 섞어 순서대로 앉힙니다.
-     · 사전 설정 모드: 미리 정해둔 자리를 그대로 씁니다.
-                       정해두지 않은 학생은 남은 자리에 무작위로 앉습니다.
+     실제 규칙(사전 자리 · 남자 자리 · 여자 자리 · 누구나 자리)은
+     seats.js 가 맡습니다. 이 파일은 연출에 집중합니다.
      ============================================================ */
-  computeAssignment() {
-    const d = State.data;
-    const desks = State.orderedDesks();
-    const assignment = {};   // 책상id -> 학생id
-
-    if (d.mode === 'preset') {
-      const used = new Set();
-      desks.forEach(dk => {
-        const sid = d.preset[dk.id];
-        if (sid && State.student(sid) && !used.has(sid)) {
-          assignment[dk.id] = sid;
-          used.add(sid);
-        }
-      });
-      const restStudents = shuffled(d.students.filter(s => !used.has(s.id)).map(s => s.id));
-      const restDesks = State.desksRoundRobin().filter(dk => !assignment[dk.id]);
-      restDesks.forEach((dk, i) => { if (restStudents[i]) assignment[dk.id] = restStudents[i]; });
-    } else {
-      const ids = shuffled(d.students.map(s => s.id));
-      State.desksRoundRobin().forEach((dk, i) => { if (ids[i]) assignment[dk.id] = ids[i]; });
-    }
-    return assignment;
-  },
+  computeAssignment() { return Seats.assign(); },
 
   /* ============================================================
      2) 자리 섞기 (애니메이션 포함)
@@ -55,15 +32,11 @@ const Shuffle = {
     if (this.busy) return;
     const d = State.data;
 
-    if (!d.students.length) {
-      toast('먼저 설정에서 학생 명단을 입력해 주세요', 3000);
-      Panel.open('students');
-      return;
-    }
-    if (!d.desks.length) {
-      toast('책상이 하나도 없습니다. 교실 편집에서 만들어 주세요', 3000);
-      return;
-    }
+    /* 모두가 앉을 수 있는지 먼저 따져 봅니다.
+       한 명이라도 앉을 자리가 없으면 화면 한가운데에 크게 알리고 멈춥니다.
+       (예전에는 그냥 섞여서, 아이들 앞에서 누군가 자리를 못 받았습니다) */
+    if (Seats.blockShuffle()) return;
+
     if (Editor.mode) Editor.exit();
 
     this.busy = true;

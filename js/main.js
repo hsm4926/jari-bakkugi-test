@@ -339,6 +339,9 @@ function wireEvents() {
   /* ---------- 편집 서브 툴바 ---------- */
   $$('.eb-mode').forEach(b => b.onclick = () => { Sound.play('click'); Editor.enter(b.dataset.editmode); });
   $('#btnAddGroup').onclick    = () => Editor.addGroup();
+  // 남·여 자리 붓 (같은 버튼을 다시 누르면 꺼집니다)
+  $$('.eb-brush').forEach(b => b.onclick = () => Editor.setBrush(b.dataset.brush));
+  $('#btnSexClear').onclick    = () => Editor.clearSex();
   $('#btnAddDesk').onclick     = () => Editor.addDesk();
   $('#btnAddLocker').onclick   = () => Editor.addLocker();
   $('#btnDelete').onclick      = () => Editor.deleteSelected();
@@ -382,6 +385,11 @@ function wireEvents() {
   $('#btnWipe').onclick = () => Panel.wipe();
   $('#pickerClose').onclick = () => Picker.close();
 
+  /* ---------- 화면 한가운데 알림 ---------- */
+  $('#alertClose').onclick = () => Alert.close();
+  // 바깥의 어두운 곳을 눌러도 닫힙니다 (상자 안쪽을 누른 건 무시)
+  $('#alert').onclick = (e) => { if (e.target.id === 'alert') Alert.close(); };
+
   /* ---------- 교실 위에서의 마우스 ----------
      빈 바닥을 끌면 화면이 움직입니다. 편집 중에도 마찬가지라,
      책상·모둠을 잡지 않았다면 화면을 옮길 수 있습니다.
@@ -419,6 +427,10 @@ function wireEvents() {
   window.addEventListener('keydown', (e) => {
     const typing = /^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName);
 
+    // 알림창이 떠 있으면 Esc 말고는 아무 단축키도 듣지 않습니다.
+    // (자리가 모자란 걸 알리는 중에 S 키로 또 섞으려 하면 혼란스럽습니다)
+    if (Alert.isOpen() && e.key !== 'Escape') return;
+
     if (CONFIG.secret.hotkey && e.ctrlKey && e.shiftKey && (e.key === 'M' || e.key === 'm')) {
       e.preventDefault(); Secret.toggle(); return;
     }
@@ -426,7 +438,8 @@ function wireEvents() {
 
     switch (e.key) {
       case 'Escape':
-        if (!$('#picker').classList.contains('hidden')) Picker.close();
+        if (Alert.isOpen()) Alert.close();
+        else if (!$('#picker').classList.contains('hidden')) Picker.close();
         else if (Editor.mode) Editor.exit();
         else if (!$('#panel').classList.contains('hidden')) Panel.close();
         break;

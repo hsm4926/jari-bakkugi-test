@@ -3,9 +3,17 @@
 
 const Editor = {
 
-  mode: null,          // null(편집 아님) | 'layout' | 'preset'
+  mode: null,          // null(편집 아님) | 'layout' | 'sex' | 'preset'
   sel: null,           // {kind, id}
   _drag: null,
+
+  /* «남·여 자리» 모드에서 지금 골라 둔 붓.
+       'b'  = 누르는 책상을 남자 자리로
+       'g'  = 여자 자리로
+       ''   = 지정 해제
+       null = 아무것도 안 골랐음 (책상을 눌러도 바뀌지 않습니다)
+     같은 버튼을 다시 누르면 꺼져서 null 이 됩니다. */
+  brush: null,
 
   /* ---------------- 편집 켜고 끄기 ---------------- */
   toggle() { this.mode ? this.exit() : this.enter('layout'); },
@@ -18,16 +26,27 @@ const Editor = {
     $('#btnEdit').classList.add('active');
     $$('.eb-mode').forEach(b => b.classList.toggle('active', b.dataset.editmode === mode));
     $('#ebLayoutTools').classList.toggle('hidden', mode !== 'layout');
+    $('#ebSexTools').classList.toggle('hidden', mode !== 'sex');
+    document.body.classList.toggle('editing-sex', mode === 'sex');
+
+    // «남·여 자리» 로 들어오면 «남자 자리로» 붓을 미리 쥐어 줍니다.
+    // (들어오자마자 바로 책상을 누를 수 있게. 다시 누르면 꺼집니다)
+    if (mode === 'sex') { if (this.brush === null) this.setBrush('b'); else this.refreshBrush(); }
+    else this.brush = null;
+
     const hasGroups = State.data.groups.length > 0;
     $('#btnAddGroup').textContent = hasGroups ? '모둠' : '모둠 만들기';
-    $('#ebHint').textContent = mode === 'layout'
-      ? (hasGroups
+    $('#ebHint').textContent =
+        mode === 'layout' ? (hasGroups
           ? '책상을 끌어서 옮기세요. 모둠 이름표를 끌면 모둠 전체가 움직입니다. Shift+드래그 = 칠판·사물함 크기 조절'
           : '책상을 끌어서 옮기세요. Shift+드래그 = 칠판·사물함 크기 조절')
-      : '책상을 눌러 앉힐 학생을 미리 정해 두세요.  ▸ 지금 공개 방식: '
-        + (State.data.mode === 'preset' ? '사전 설정' : '무작위');
+      : mode === 'sex'
+          ? '표시가 없는 책상에는 누구나 앉습니다.'
+          : '책상을 눌러 앉힐 학생을 미리 정해 두세요.  ▸ 지금 공개 방식: '
+            + (State.data.mode === 'preset' ? '사전 설정' : '무작위');
     banner(null);
     Render.applyEditVisuals();
+    this.refreshSexCount();
     View.applyZoom();
   },
 
@@ -35,6 +54,7 @@ const Editor = {
     this.mode = null;
     this.select(null);
     document.body.classList.remove('editing');
+    document.body.classList.remove('editing-sex');
     document.body.classList.toggle('show-grid', CONFIG.view.showGridAlways);
     $('#editbar').classList.add('hidden');
     $('#btnEdit').classList.remove('active');
@@ -72,6 +92,14 @@ const Editor = {
     /* 사전 자리 정하기: 책상을 누르면 학생 고르기 팝업 */
     if (this.mode === 'preset') {
       if (kind === 'desk') { Sound.play('click'); Picker.open(id, e.clientX, e.clientY); }
+      return true;
+    }
+
+    /* 남·여 자리: 골라 둔 붓으로 누른 책상을 칠합니다.
+       이 모드에서는 책상을 끌어 옮길 수 없습니다 — 자리를 정하다가
+       실수로 배치가 흐트러지면 되돌리기가 번거롭기 때문입니다. */
+    if (this.mode === 'sex') {
+      if (kind === 'desk') this.paintSex(id);
       return true;
     }
 
@@ -139,6 +167,74 @@ const Editor = {
       const c = Render.cards[dk.id];
       if (c) { c.root.style.transition = 'none'; c.root.style.transform = `translate(${dk.x}px, ${dk.y}px)`; }
     });
+  },
+
+  /* ============================================================
+     남자 자리 · 여자 자리 정하기
+     ------------------------------------------------------------
+     선생님이 «남자 자리로» 같은 버튼을 하나 골라 둔 채로 책상을 누르면
+     그 책상이 바뀝니다. 버튼은 다시 누르면 꺼집니다.
+     ============================================================ */
+
+  /** 붓 고르기. 이미 골라 둔 것을 다시 고르면 꺼집니다(null). */
+  setBrush(v) {
+    const next = (this.brush === v) ? null : v;
+    this.brush = next;
+    this.refreshBrush();
+    Sound.play('click');
+  },
+
+  refreshBrush() {
+    $$('.eb-brush').forEach(b =>
+      b.classList.toggle('active', this.brush !== null && b.dataset.brush === this.brush));
+  },
+
+  /** 책상 하나를 지금 붓으로 칠합니다 */
+  paintSex(deskId) {
+    if (this.brush === null) {
+      toast('위에서 «남자 자리로» 나 «여자 자리로» 를 먼저 골라 주세요', 2600);
+      return;
+    }
+    const dk = State.desk(deskId);
+    if (!dk) return;
+
+    const want = this.brush || null;              // '' (지정 해제) 는 null 로
+    if (State.deskSex(dk) === want) return;       // 이미 그 상태면 아무 일도 하지 않습니다
+    if (want) dk.sex = want; else delete dk.sex;
+
+    Sound.play('click');
+    Render.paintDeskSex(deskId);                  // 그 책상 하나만 다시 칠합니다
+    this.afterSexChange();
+  },
+
+  /** 모든 책상의 성별 지정을 지웁니다 */
+  clearSex() {
+    const marked = State.data.desks.filter(dk => State.deskSex(dk));
+    if (!marked.length) { toast('성별을 정해 둔 자리가 없습니다'); return; }
+    if (!confirm(`남자·여자 자리 지정 ${marked.length}개를 모두 지웁니다.\n계속할까요?`)) return;
+    marked.forEach(dk => delete dk.sex);
+    Render.desks();
+    this.afterSexChange();
+    toast(`${marked.length}개의 자리 지정을 지웠습니다`);
+  },
+
+  afterSexChange() {
+    this.refreshSexCount();
+    Panel.refreshCounts();
+    State.save();
+  },
+
+  /** 편집 툴바 오른쪽의 «남자 10 · 여자 10 · 누구나 4» 요약 */
+  refreshSexCount() {
+    const node = $('#ebSexCount');
+    if (!node) return;
+    if (this.mode !== 'sex') { node.textContent = ''; return; }
+
+    const c = Seats.check();
+    node.textContent = `남자 ${c.seatB} · 여자 ${c.seatG} · 누구나 ${c.seatFree}`;
+    if (!c.ok) {
+      node.appendChild(el('span', { class: 'bad', text: `   ⚠ ${c.short}자리 모자람` }));
+    }
   },
 
   /* ---------------- 추가 / 삭제 ---------------- */
@@ -269,6 +365,7 @@ const Editor = {
     Render.all();
     this.select(null);
     Panel.refreshCounts();
+    this.refreshSexCount();
     State.save();
     if (msg) toast(msg);
   },
@@ -288,7 +385,10 @@ const Picker = {
 
     const dk = State.desk(deskId);
     const g = dk ? State.group(dk.gid) : null;
-    $('#pickerTitle').textContent = (g ? g.name + ' ' : '') + (dk && dk.no ? dk.no + '번 자리' : '자리');
+    const want = State.deskSex(dk);        // 이 자리가 남자·여자 자리로 정해져 있는지
+    $('#pickerTitle').textContent =
+      (g ? g.name + ' ' : '') + (dk && dk.no ? dk.no + '번 자리' : '자리')
+      + (want ? (want === 'b' ? ' · 남자 자리' : ' · 여자 자리') : '');
 
     const taken = State.presetTakenIds();
     const cur = State.data.preset[deskId];
@@ -305,9 +405,13 @@ const Picker = {
 
     State.data.students.forEach(s => {
       const isTaken = taken.has(s.id) && s.id !== cur;
+      // 남자 자리에 여학생을 앉히는 것도 막지는 않습니다. 선생님이 일부러 그럴 수 있으니
+      // 흐리게 표시만 하고, 고르면 그대로 들어갑니다.
+      const odd = want && (s.sex === 'g' ? 'g' : 'b') !== want;
       list.appendChild(el('button', {
-        class: 'picker-item' + (isTaken ? ' taken' : ''),
-        text: s.name + (isTaken ? ' (이미 배정됨)' : (s.id === cur ? ' ✓' : '')),
+        class: 'picker-item' + (isTaken ? ' taken' : '') + (odd ? ' taken' : ''),
+        text: s.name + (isTaken ? ' (이미 배정됨)' : (s.id === cur ? ' ✓' : ''))
+              + (odd ? (s.sex === 'g' ? ' (여)' : ' (남)') : ''),
         onclick: () => {
           // 다른 자리에 있던 같은 학생은 비워 줍니다
           for (const k in State.data.preset) if (State.data.preset[k] === s.id) delete State.data.preset[k];

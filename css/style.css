@@ -24,6 +24,13 @@
   --board-frame:#8a5a2b;
   --locker:#c39a63;
   --locker-edge:#8a6236;
+
+  /* 남자 자리 · 여자 자리 표시색. 나무색 책상 위에 살짝 덮는 용도라
+     너무 진하면 교실 분위기가 깨집니다. */
+  --sex-b:#4f8fc4;       /* 남 (파랑) */
+  --sex-b-ink:#173f5e;
+  --sex-g:#c9709a;       /* 여 (분홍) */
+  --sex-g-ink:#5e1b3c;
 }
 
 *{box-sizing:border-box;margin:0;padding:0}
@@ -95,6 +102,14 @@ img{image-rendering:pixelated}
   font-family:'NeoDunggeunmo',sans-serif; font-size:14px;
   color:var(--accent-2); margin-left:auto;
 }
+/* 남·여 자리 브러시 — 켜져 있는 것만 색이 들어옵니다 */
+.eb-brush.brush-b.active{background:var(--sex-b); border-color:#7ab4e0; color:#0d2a40}
+.eb-brush.brush-g.active{background:var(--sex-g); border-color:#e295b8; color:#3d0f26}
+.eb-count{
+  font-family:'NeoDunggeunmo',sans-serif; font-size:14px;
+  color:var(--ink-dim); white-space:nowrap; margin-left:6px;
+}
+.eb-count .bad{color:#ff9f8f}
 
 /* ---------------- 교실 화면 ---------------- */
 #viewport{
@@ -219,12 +234,53 @@ body.editing .desk:active{cursor:grabbing}
   box-shadow:0 3px 0 rgba(90,60,25,.4), 0 0 0 2px rgba(255,255,255,.5);
   pointer-events:none;
 }
+/* ---------------- 남자 자리 · 여자 자리 ----------------
+   책상 상판 색 자체를 바꿉니다.
+
+   ⚠️ 처음에는 나무색 책상 위에 반투명한 파랑·분홍을 덮었는데,
+      파랑이 나무색(주황)의 보색이라 둘이 섞이면 회색으로 죽어 버려
+      남자 자리가 «색이 빠진 책상» 처럼 보였습니다.
+      그래서 덮지 않고 상판 색을 통째로 지정합니다. */
+.desk.sex-b{
+  background:linear-gradient(180deg,#d5e7f6 0%, #aecbe2 55%, #8bacc8 100%);
+  border-color:var(--sex-b);
+}
+.desk.sex-g{
+  background:linear-gradient(180deg,#f8dcee 0%, #e9bcd4 55%, #d59fbb 100%);
+  border-color:var(--sex-g);
+}
+.desk.sex-b::before{background:var(--sex-b)}   /* 의자도 같은 색으로 */
+.desk.sex-g::before{background:var(--sex-g)}
+
+/* «남·여 자리» 를 편집하는 동안에는 테두리를 하나 더 둘러 또렷하게.
+   box-shadow 로 하면 마우스를 올렸을 때의 노란 강조를 덮어쓰므로 outline 을 씁니다. */
+body.editing-sex .desk.sex-b{outline:3px solid var(--sex-b); outline-offset:2px}
+body.editing-sex .desk.sex-g{outline:3px solid var(--sex-g); outline-offset:2px}
+/* 지정이 없는 책상은 «누구나 자리» 입니다. 편집 중에만 살짝 흐리게 해서
+   어디를 아직 안 정했는지 보이게 합니다. */
+body.editing-sex .desk:not(.sex-b):not(.sex-g){opacity:.62}
+
+/* 책상 오른쪽 위에 붙는 «남 / 여» 딱지.
+   왼쪽 위의 자리 번호와 겹치지 않도록 반대쪽 모서리에 답니다. */
+.sex-no{
+  position:absolute; right:-9px; top:-10px; z-index:2;
+  display:flex; align-items:center; justify-content:center;
+  width:30px; height:30px; border-radius:50%;
+  font-family:'NeoDunggeunmo',sans-serif; font-size:17px; line-height:1;
+  border:3px solid; box-shadow:0 2px 0 rgba(90,60,25,.35);
+  pointer-events:none;
+}
+.desk.sex-b .sex-no{background:#f2f8fd; color:var(--sex-b-ink); border-color:var(--sex-b)}
+.desk.sex-g .sex-no{background:#fdf1f7; color:var(--sex-g-ink); border-color:var(--sex-g)}
+
 .desk-preset{
   position:absolute; inset:auto 0 6px 0; text-align:center;
   font-family:'NeoDunggeunmo',sans-serif; font-size:16px; color:#5a3f22;
   text-shadow:0 1px 0 rgba(255,255,255,.4);
 }
 .desk-preset.empty{color:rgba(90,63,34,.35)}
+/* 사전에 정해둔 학생의 성별이 그 자리와 다를 때 (선생님 뜻대로 두되 눈에는 띄게) */
+.desk-preset.bad{color:#8a1f1f; text-decoration:underline wavy #c0392b 2px}
 
 /* ---------------- 카드 (알 / 학생) ---------------- */
 .card{
@@ -359,6 +415,11 @@ body.editing .desk:active{cursor:grabbing}
   background:#5a3a20; border:2px solid #8a5c2f; color:#ffd9a8;
   border-radius:8px; padding:10px 12px; font-size:14px; line-height:1.6; margin-top:14px;
 }
+.warn div + div{margin-top:3px}
+/* 그냥 «남는다» 가 아니라 «앉을 수 없는 사람이 생긴다» 는 뜻이면 붉게 —
+   이 상태에서는 자리 섞기 자체가 막힙니다. */
+.warn.bad{background:#4d2529; border-color:#8a4443; color:#ffd7d2}
+.warn.bad div:last-child{color:var(--accent); margin-top:6px}
 .mode-readout{
   font-family:'NeoDunggeunmo',sans-serif; font-size:22px; text-align:center;
   padding:12px; border-radius:8px; border:2px solid #5c4d6b; background:#221b29;
@@ -526,3 +587,62 @@ body.editing .desk:active{cursor:grabbing}
 .sc-plain:hover{color:var(--ink)}
 .sc-tip{font-family:'NeoDunggeunmo',sans-serif; font-size:14px; color:#6d6178; margin-top:6px}
 .sc-tip b{color:var(--accent-2)}
+
+/* ============================================================
+   화면 한가운데 알림 (자리가 모자랄 때 등)
+   ------------------------------------------------------------
+   교실 TV 로 아이들과 함께 보는 화면이라 크고 또렷하게 만듭니다.
+   그냥 넘어가면 안 되는 일이므로 화면을 덮고 버튼을 누르게 합니다.
+   ============================================================ */
+#alert{
+  position:fixed; inset:0; z-index:90;
+  display:flex; align-items:center; justify-content:center;
+  background:rgba(20,14,26,.72);
+  animation:alertFade .18s ease;
+}
+@keyframes alertFade{from{opacity:0} to{opacity:1}}
+
+.alert-box{
+  position:relative;
+  width:min(680px, 88vw); max-height:86vh; overflow-y:auto;
+  background:#2f2738; color:var(--ink);
+  border:4px solid var(--danger); border-radius:16px;
+  box-shadow:0 18px 60px rgba(0,0,0,.6);
+  padding:26px 34px 24px;
+  animation:alertPop .26s cubic-bezier(.2,1.5,.4,1);
+}
+@keyframes alertPop{from{transform:scale(.85); opacity:0} to{transform:scale(1); opacity:1}}
+
+/* 제목 위의 느낌표 동그라미.
+   ⚠️ 상자 밖(top:-30px)에 걸쳐 두었더니 상자의 overflow 에 잘려서
+      점처럼 보였습니다. 안쪽에 그냥 얹습니다. */
+.alert-mark{
+  width:54px; height:54px; margin:0 auto 12px; border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  background:var(--danger); color:#fff;
+  font-family:'NeoDunggeunmo',sans-serif; font-size:34px; line-height:1;
+  box-shadow:0 4px 0 rgba(0,0,0,.28);
+}
+.alert-title{
+  font-family:'NeoDunggeunmo',sans-serif; font-size:30px; color:#ffd7d2;
+  text-align:center; margin:0 0 18px;
+}
+.alert-list{
+  list-style:none; margin:0 0 20px;
+  background:#241d2b; border:2px solid #4b3f58; border-radius:10px;
+  padding:14px 18px;
+}
+.alert-list li{
+  font-size:18px; line-height:1.75; color:var(--ink);
+  padding-left:14px; position:relative;
+}
+.alert-list li::before{
+  content:''; position:absolute; left:0; top:.72em;
+  width:5px; height:5px; border-radius:50%; background:var(--accent-2);
+}
+/* 마지막 줄은 «그래서 뭘 하면 되는지» 이므로 눈에 띄게 */
+.alert-list li:last-child{color:var(--accent); font-size:19px; margin-top:4px}
+.alert-list li:last-child::before{background:var(--accent)}
+
+.alert-btns{display:flex; justify-content:center; gap:12px}
+.alert-btns .btn{font-size:18px; padding:11px 24px}

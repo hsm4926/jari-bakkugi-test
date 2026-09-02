@@ -185,6 +185,10 @@ const Presets = {
     const bits = [];
     bits.push(grp ? `${grp}모둠 ${seats}자리` : `모둠 없음 · ${seats}자리`);
     bits.push(`학생 ${stu}명`);
+    // 남·여 자리를 정해 둔 프리셋이면 그 수도 보여 줍니다
+    const sb = (s.desks || []).filter(x => x.sex === 'b').length;
+    const sg = (s.desks || []).filter(x => x.sex === 'g').length;
+    if (sb || sg) bits.push(`남자 ${sb} · 여자 ${sg} 자리`);
     if (fixed) bits.push(`사전 자리 ${fixed}`);
 
     if (p.savedAt) {

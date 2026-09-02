@@ -4,14 +4,14 @@
 <meta charset="utf-8">
 <meta name="theme-color" content="#2c2434">
 <meta name="description" content="초등학교 교실용 자리 바꾸기 프로그램. 알을 깨서 한 명씩 자리를 공개합니다.">
-<link rel="manifest" href="manifest.webmanifest?v=1.8.3">
-<link rel="apple-touch-icon" href="icons/icon-180.png?v=1.8.3">
+<link rel="manifest" href="manifest.webmanifest?v=1.9.0">
+<link rel="apple-touch-icon" href="icons/icon-180.png?v=1.9.0">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="자리 바꾸기">
 <title>[테스트] 우리 반 자리 바꾸기</title>
-<link rel="icon" href="assets/sprites/desk-icon.png?v=1.8.3">
-<link rel="stylesheet" href="css/fonts.css?v=1.8.3">
-<link rel="stylesheet" href="css/style.css?v=1.8.3">
+<link rel="icon" href="assets/sprites/desk-icon.png?v=1.9.0">
+<link rel="stylesheet" href="css/fonts.css?v=1.9.0">
+<link rel="stylesheet" href="css/style.css?v=1.9.0">
 <style>
   .tb-test{
     font-family:'NeoDunggeunmo',sans-serif; font-size:13px;
@@ -32,9 +32,9 @@
 <div id="startCover">
   <div class="sc-box">
     <div class="sc-cast">
-      <img src="assets/sprites/student/boy1-3.png?v=1.8.3" alt="">
-      <img src="assets/sprites/egg/01.png?v=1.8.3" class="sc-egg" alt="">
-      <img src="assets/sprites/student/girl1-1.png?v=1.8.3" alt="">
+      <img src="assets/sprites/student/boy1-3.png?v=1.9.0" alt="">
+      <img src="assets/sprites/egg/01.png?v=1.9.0" class="sc-egg" alt="">
+      <img src="assets/sprites/student/girl1-1.png?v=1.9.0" alt="">
     </div>
     <div class="sc-title">우리 반 자리 바꾸기</div>
     <div class="sc-ver" id="scVer"></div>
@@ -47,7 +47,7 @@
 <!-- ===================== 상단 툴바 ===================== -->
 <header id="toolbar">
   <div class="tb-left">
-    <img class="tb-icon" src="assets/sprites/desk-icon.png?v=1.8.3" alt="">
+    <img class="tb-icon" src="assets/sprites/desk-icon.png?v=1.9.0" alt="">
     <span class="tb-title">우리 반 자리 바꾸기</span>
     <span class="tb-ver" id="tbVer"></span><span class="tb-test">테스트</span>
   </div>
@@ -78,6 +78,7 @@
   <div class="eb-group">
     <span class="eb-label">편집 대상</span>
     <button class="btn btn-sm eb-mode active" data-editmode="layout">자리 배치</button>
+    <button class="btn btn-sm eb-mode" data-editmode="sex">남 · 여 자리</button>
     <button class="btn btn-sm eb-mode" data-editmode="preset">사전 자리 정하기</button>
   </div>
 
@@ -89,6 +90,17 @@
     <span class="eb-sep"></span>
     <button id="btnDelete" class="btn btn-sm btn-danger">선택한 것 삭제</button>
     <button id="btnAutoArrange" class="btn btn-sm">처음 배치로 되돌리기</button>
+  </div>
+
+  <!-- 남·여 자리 정하기: 아래 버튼을 하나 골라 둔 채로 책상을 누릅니다 -->
+  <div class="eb-group hidden" id="ebSexTools">
+    <span class="eb-label">책상을 누르면</span>
+    <button id="btnSexBoy"  class="btn btn-sm eb-brush brush-b" data-brush="b">남자 자리로</button>
+    <button id="btnSexGirl" class="btn btn-sm eb-brush brush-g" data-brush="g">여자 자리로</button>
+    <button id="btnSexNone" class="btn btn-sm eb-brush" data-brush="">지정 해제</button>
+    <span class="eb-sep"></span>
+    <button id="btnSexClear" class="btn btn-sm">전부 해제</button>
+    <span class="eb-count" id="ebSexCount"></span>
   </div>
 
   <div class="eb-hint" id="ebHint">
@@ -347,20 +359,34 @@
 <!-- 선생님 전용: 왼쪽 아래 구석 (화면엔 보이지 않음) -->
 <div id="secretHotspot"><div id="modeDot"></div></div>
 
+<!-- 그냥 넘어가면 안 되는 일을 알리는 큰 창 (자리가 모자랄 때 등) -->
+<div id="alert" class="hidden">
+  <div class="alert-box">
+    <div class="alert-mark">!</div>
+    <div class="alert-title" id="alertTitle"></div>
+    <ul class="alert-list" id="alertList"></ul>
+    <div class="alert-btns">
+      <button id="alertGo" class="btn btn-main">교실 편집 열기</button>
+      <button id="alertClose" class="btn">닫기</button>
+    </div>
+  </div>
+</div>
+
 <div id="toast" class="hidden"></div>
 
-<script src="version.js?v=1.8.3"></script>
-<script src="config.js?v=1.8.3"></script>
-<script src="js/util.js?v=1.8.3"></script>
-<script src="js/audio.js?v=1.8.3"></script>
-<script src="js/state.js?v=1.8.3"></script>
-<script src="js/layout.js?v=1.8.3"></script>
-<script src="js/render.js?v=1.8.3"></script>
-<script src="js/editor.js?v=1.8.3"></script>
-<script src="js/shuffle.js?v=1.8.3"></script>
-<script src="js/panel.js?v=1.8.3"></script>
-<script src="js/presets.js?v=1.8.3"></script>
-<script src="js/main.js?v=1.8.3"></script>
+<script src="version.js?v=1.9.0"></script>
+<script src="config.js?v=1.9.0"></script>
+<script src="js/util.js?v=1.9.0"></script>
+<script src="js/audio.js?v=1.9.0"></script>
+<script src="js/state.js?v=1.9.0"></script>
+<script src="js/seats.js?v=1.9.0"></script>
+<script src="js/layout.js?v=1.9.0"></script>
+<script src="js/render.js?v=1.9.0"></script>
+<script src="js/editor.js?v=1.9.0"></script>
+<script src="js/shuffle.js?v=1.9.0"></script>
+<script src="js/panel.js?v=1.9.0"></script>
+<script src="js/presets.js?v=1.9.0"></script>
+<script src="js/main.js?v=1.9.0"></script>
 <script>
 /* 서비스 워커 등록 — 인터넷이 끊겨도 열리게 해 줍니다. 실패해도 프로그램은 그대로 돌아갑니다. */
 if ('serviceWorker' in navigator) {
