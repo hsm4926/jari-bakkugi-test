@@ -154,6 +154,8 @@ const Arrange = {
     btn.classList.toggle('hidden', !can);
     btn.classList.toggle('ready', can && Layouts.allRevealed());
     if (!can) Layouts.closePicker();
+    // 자리가 바뀌면 «지금 배치» 노란 불도 따라 옮겨 가야 합니다
+    Layouts.render();
   },
 
   /* ============================================================

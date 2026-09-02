@@ -4,15 +4,15 @@
 <meta charset="utf-8">
 <meta name="theme-color" content="#2c2434">
 <meta name="description" content="초등학교 교실용 자리 바꾸기 프로그램. 알을 깨서 한 명씩 자리를 공개합니다.">
-<link rel="manifest" href="manifest.webmanifest?v=1.12.0">
-<link rel="apple-touch-icon" href="icons/icon-180.png?v=1.12.0">
+<link rel="manifest" href="manifest.webmanifest?v=1.13.0">
+<link rel="apple-touch-icon" href="icons/icon-180.png?v=1.13.0">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="자리 바꾸기">
 <script>window.__JARI_TEST=true;</script>
 <title>[테스트] 우리 반 자리 바꾸기</title>
-<link rel="icon" href="assets/sprites/desk-icon.png?v=1.12.0">
-<link rel="stylesheet" href="css/fonts.css?v=1.12.0">
-<link rel="stylesheet" href="css/style.css?v=1.12.0">
+<link rel="icon" href="assets/sprites/desk-icon.png?v=1.13.0">
+<link rel="stylesheet" href="css/fonts.css?v=1.13.0">
+<link rel="stylesheet" href="css/style.css?v=1.13.0">
 <style>
   .tb-test{
     font-family:'NeoDunggeunmo',sans-serif; font-size:13px;
@@ -33,9 +33,9 @@
 <div id="startCover">
   <div class="sc-box">
     <div class="sc-cast">
-      <img src="assets/sprites/student/boy1-3.png?v=1.12.0" alt="">
-      <img src="assets/sprites/egg/01.png?v=1.12.0" class="sc-egg" alt="">
-      <img src="assets/sprites/student/girl1-1.png?v=1.12.0" alt="">
+      <img src="assets/sprites/student/boy1-3.png?v=1.13.0" alt="">
+      <img src="assets/sprites/egg/01.png?v=1.13.0" class="sc-egg" alt="">
+      <img src="assets/sprites/student/girl1-1.png?v=1.13.0" alt="">
     </div>
     <div class="sc-title">우리 반 자리 바꾸기</div>
     <div class="sc-ver" id="scVer"></div>
@@ -48,7 +48,7 @@
 <!-- ===================== 상단 툴바 ===================== -->
 <header id="toolbar">
   <div class="tb-left">
-    <img class="tb-icon" src="assets/sprites/desk-icon.png?v=1.12.0" alt="">
+    <img class="tb-icon" src="assets/sprites/desk-icon.png?v=1.13.0" alt="">
     <span class="tb-title">우리 반 자리 바꾸기</span>
     <span class="tb-ver" id="tbVer"></span><span class="tb-test">테스트</span>
   </div>
@@ -57,11 +57,16 @@
     <!-- 섞은 결과가 있을 때만 보입니다. 모두 공개되면 빛납니다. -->
     <button id="btnSaveLayout" class="btn btn-sm hidden"
             title="지금 이 자리 배치를 칸에 저장합니다">＋ 배치 저장</button>
-    <button id="btnShuffle" class="btn btn-main">자리 섞기</button>
-    <button id="btnRevealSeq" class="btn">순서대로 공개</button>
-    <button id="btnRevealRand" class="btn">랜덤 공개</button>
-    <button id="btnRevealNow" class="btn">한 번에 공개</button>
-    <button id="btnReset" class="btn btn-ghost">다시 덮기</button>
+
+    <!-- 수업 중 실제로 누르는 «핵심» 버튼들. 상자로 묶어 눈에 먼저 들어오게 합니다. -->
+    <div class="tb-core">
+      <button id="btnShuffle" class="btn btn-main">자리 섞기</button>
+      <button id="btnRevealSeq" class="btn">순서대로 공개</button>
+      <button id="btnRevealRand" class="btn">랜덤 공개</button>
+      <button id="btnRevealNow" class="btn">한 번에 공개</button>
+      <button id="btnReset" class="btn btn-ghost">다시 덮기</button>
+    </div>
+
     <button id="btnFlip" class="btn btn-sm btn-ghost"
             title="교실을 180° 돌립니다 — 선생님이 아이들을 마주 본 방향 (T)">⇅ 뒤집기</button>
   </div>
@@ -187,6 +192,8 @@
           <div class="row">
             <button id="btnAllBoy" class="btn btn-sm">전부 남</button>
             <button id="btnAllGirl" class="btn btn-sm">전부 여</button>
+            <!-- 이름을 누를 때마다 저절로 다시 셉니다 (Panel.refreshSexTally) -->
+            <span id="sexTally" class="sex-tally"></span>
           </div>
         </div>
       </div>
@@ -400,22 +407,22 @@
 
 <div id="toast" class="hidden"></div>
 
-<script src="version.js?v=1.12.0"></script>
-<script src="config.js?v=1.12.0"></script>
-<script src="js/util.js?v=1.12.0"></script>
-<script src="js/audio.js?v=1.12.0"></script>
-<script src="js/state.js?v=1.12.0"></script>
-<script src="js/seats.js?v=1.12.0"></script>
-<script src="js/history.js?v=1.12.0"></script>
-<script src="js/layouts.js?v=1.12.0"></script>
-<script src="js/arrange.js?v=1.12.0"></script>
-<script src="js/layout.js?v=1.12.0"></script>
-<script src="js/render.js?v=1.12.0"></script>
-<script src="js/editor.js?v=1.12.0"></script>
-<script src="js/shuffle.js?v=1.12.0"></script>
-<script src="js/panel.js?v=1.12.0"></script>
-<script src="js/presets.js?v=1.12.0"></script>
-<script src="js/main.js?v=1.12.0"></script>
+<script src="version.js?v=1.13.0"></script>
+<script src="config.js?v=1.13.0"></script>
+<script src="js/util.js?v=1.13.0"></script>
+<script src="js/audio.js?v=1.13.0"></script>
+<script src="js/state.js?v=1.13.0"></script>
+<script src="js/seats.js?v=1.13.0"></script>
+<script src="js/history.js?v=1.13.0"></script>
+<script src="js/layouts.js?v=1.13.0"></script>
+<script src="js/arrange.js?v=1.13.0"></script>
+<script src="js/layout.js?v=1.13.0"></script>
+<script src="js/render.js?v=1.13.0"></script>
+<script src="js/editor.js?v=1.13.0"></script>
+<script src="js/shuffle.js?v=1.13.0"></script>
+<script src="js/panel.js?v=1.13.0"></script>
+<script src="js/presets.js?v=1.13.0"></script>
+<script src="js/main.js?v=1.13.0"></script>
 <script>
 /* 서비스 워커 등록 — 인터넷이 끊겨도 열리게 해 줍니다. 실패해도 프로그램은 그대로 돌아갑니다. */
 if ('serviceWorker' in navigator) {

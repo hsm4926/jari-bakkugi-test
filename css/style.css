@@ -71,18 +71,39 @@ img{image-rendering:pixelated}
 .btn:disabled:hover{background:#3b3145; border-color:#5c4d6b}
 
 /* ---------------- 상단 툴바 ---------------- */
+/* ★ 높이를 60px 로 못 박지 않습니다.
+   화면이 좁으면 버튼이 «서로 겹치거나 잘리는» 대신 아랫줄로 내려가야 하는데,
+   높이가 고정이면 내려간 줄이 막대 밖으로 삐져나가 잘려 버립니다.
+   실제 높이는 View.syncBars() 가 재서 교실 위치에 반영합니다. */
 #toolbar{
   position:relative; z-index:40;
-  display:flex; align-items:center; gap:12px;
-  height:60px; padding:0 14px;
+  display:flex; align-items:center; flex-wrap:wrap;
+  gap:12px; row-gap:7px;
+  min-height:60px; padding:5px 14px;
   background:var(--bar); border-bottom:2px solid var(--bar-line);
 }
 .tb-left{display:flex; align-items:center; gap:9px; min-width:230px}
 .tb-icon{width:40px; height:40px; flex:none}
 .tb-title{font-family:'NeoDunggeunmo',sans-serif; font-size:22px; color:var(--accent)}
 .tb-ver{font-family:'NeoDunggeunmo',sans-serif; font-size:12px; color:#6d6178; align-self:flex-end; padding-bottom:7px}
-.tb-center{flex:1; display:flex; justify-content:center; gap:10px}
-.tb-right{display:flex; align-items:center; gap:8px; min-width:230px; justify-content:flex-end}
+.tb-center{flex:1 1 auto; display:flex; align-items:center; justify-content:center;
+           flex-wrap:wrap; gap:10px; row-gap:7px}
+.tb-right{display:flex; align-items:center; flex-wrap:wrap; gap:8px; row-gap:7px;
+          min-width:230px; justify-content:flex-end}
+
+/* ---------------- 핵심 버튼 묶음 ----------------
+   수업 중에 실제로 누르는 것은 이 다섯 개뿐입니다.
+   («현재 배치»·«교실 편집»·«설정» 은 준비할 때 쓰는 버튼입니다)
+   그래서 이 다섯 개만 상자로 감싸 한눈에 구분되게 합니다. */
+.tb-core{
+  display:flex; align-items:center; justify-content:center;
+  flex-wrap:wrap; gap:9px; row-gap:6px;
+  padding:5px 12px; border-radius:13px;
+  background:linear-gradient(180deg,#3f3350 0%,#342a3f 100%);
+  border:2px solid rgba(255,207,92,.42);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.07),
+             0 3px 12px rgba(0,0,0,.30);
+}
 #btnShuffle{font-size:20px; padding:11px 26px}
 /* 교실 뒤집기 — 자주 쓰는 버튼이 아니라 작게 둡니다. 켜지면 노랗게 바뀝니다(.btn.active) */
 #btnFlip{align-self:center; padding:7px 11px}
@@ -93,6 +114,15 @@ img{image-rendering:pixelated}
 .zoom-box .btn{border:none; background:transparent; padding:5px 8px; min-width:0}
 .zoom-box .btn:hover{background:#4d4159}
 #zoomLabel{font-family:'NeoDunggeunmo',sans-serif; font-size:14px; color:var(--ink-dim); width:46px; text-align:center}
+
+/* 설정 ▸ 성별 칸의 «남 12 · 여 13» 자동 표기 */
+.sex-tally{
+  font-family:'NeoDunggeunmo',sans-serif; font-size:16px;
+  color:var(--ink-dim); margin-left:auto; white-space:nowrap;
+}
+.sex-tally .b{color:#a5d3f5}
+.sex-tally .g{color:#ffb6d4}
+.sex-tally .all{font-size:13px; color:#8d8199}
 
 /* ---------------- 편집 서브 툴바 ---------------- */
 #editbar{
@@ -679,19 +709,34 @@ body.show-sex .desk.sex-g .sex-no{
    교실 TV 는 1920 이지만 맥북·노트북은 1366 인 경우가 많습니다.
    그대로 두면 위쪽 버튼이 두 줄로 접혀 글씨가 잘려 보입니다.
    ============================================================ */
-@media (max-width:1560px){
+/* ① 조금 좁음 — 글씨와 여백을 줄여 한 줄을 지킵니다 */
+@media (max-width:1820px){
   .tb-left,.tb-right{min-width:0}
   .tb-title{font-size:18px}
-  .tb-center{gap:6px}
-  .tb-center .btn{font-size:15px; padding:8px 11px}
+  .tb-center{gap:7px}
+  .tb-center .btn,.tb-right .btn{font-size:15px; padding:8px 11px}
   #btnShuffle{font-size:17px; padding:9px 16px}
-  #btnFlip{padding:6px 8px}
+  #btnFlip,#btnSaveLayout{padding:6px 9px}
+  .tb-core{padding:4px 10px; gap:7px}
+  .zoom-box{padding:2px 4px}
+  .zoom-box .btn{padding:4px 6px}
+  #zoomLabel{width:40px; font-size:13px}
   .eb-hint{display:none}          /* 힌트보다 버튼이 우선입니다 */
 }
-@media (max-width:1320px){
-  .tb-title{display:none}         /* 제목은 없어도 되는 정보입니다 */
-  .tb-center .btn{font-size:14px; padding:7px 9px}
+/* ② 더 좁음 — 없어도 되는 것부터 치웁니다 */
+@media (max-width:1560px){
+  .tb-title{display:none}         /* 제목은 없어도 되는 정보입니다 (아이콘·버전은 남깁니다) */
   .zoom-box{display:none}         /* 확대·축소는 +/- 키와 휠로도 됩니다 */
+  .tb-center .btn,.tb-right .btn{font-size:14px; padding:7px 9px}
+  #btnShuffle{font-size:16px; padding:8px 14px}
+  .tb-core{padding:4px 8px; gap:6px}
+}
+/* ③ 여기서부터는 한 줄에 도저히 안 들어갑니다.
+   억지로 밀어 넣어 겹치게 두지 말고, 핵심 버튼 묶음을 통째로 아랫줄로 내립니다. */
+@media (max-width:1180px){
+  .tb-left{flex:1 1 auto}
+  .tb-right{flex:0 0 auto}
+  .tb-center{order:3; flex:1 0 100%}
 }
 
 /* ============================================================
@@ -710,7 +755,8 @@ body.show-sex .desk.sex-g .sex-no{
 
 /* 툴바 아래로 내려오는 «어느 칸에 저장할까요?» */
 #slotPicker{
-  position:absolute; top:64px; left:50%; transform:translateX(-50%);
+  /* 막대가 두 줄이 되면 그만큼 아래에서 시작해야 가려지지 않습니다 */
+  position:absolute; top:calc(var(--toolbar-h,60px) + 4px); left:50%; transform:translateX(-50%);
   z-index:45; width:min(460px, 92vw);
   background:#2c2434; border:3px solid #5c4d6b; border-radius:12px;
   box-shadow:0 14px 40px rgba(0,0,0,.55);
@@ -734,6 +780,7 @@ body.show-sex .desk.sex-g .sex-no{
 }
 .slot:hover{background:#4a3e58; border-color:var(--accent)}
 .slot.used{border-color:#6d5d7c}
+.slot.current{border-color:var(--accent); background:#463a52}
 .slot-no{
   flex:none; width:26px; height:26px; border-radius:50%;
   display:flex; align-items:center; justify-content:center;
@@ -770,6 +817,23 @@ body.show-sex .desk.sex-g .sex-no{
 }
 .slot-item.empty{opacity:.5}
 .slot-item:last-child{margin-bottom:0}
+/* 마우스를 올리면 «칸 전체» 가 밝아집니다 (예전엔 이름 글자만 바뀌어 잘 안 보였습니다) */
+.slot-item:not(.empty){transition:background .12s, border-color .12s}
+.slot-item:not(.empty):hover{background:#453a51; border-color:var(--accent)}
+
+/* ★ 지금 화면에 깔린 배치와 «똑같은» 칸에는 노란 불이 들어옵니다.
+   («번호 동그라미» 자체가 켜집니다 — 작은 점보다 멀리서도 눈에 띕니다) */
+.slot-item.current{border-color:var(--accent); background:#413550;
+                   box-shadow:0 0 0 1px rgba(255,207,92,.35)}
+.slot-item.current .slot-no, .slot.current .slot-no{
+  background:var(--accent); border-color:#ffe9b3; color:#3a2a10;
+  box-shadow:0 0 10px 2px rgba(255,207,92,.6);
+}
+.slot-now{
+  font-family:'NeoDunggeunmo',sans-serif; font-size:11px;
+  color:#3a2a10; background:var(--accent);
+  border-radius:99px; padding:2px 7px; flex:none;
+}
 .slot-open{
   display:flex; align-items:center; gap:8px; width:100%;
   background:none; border:none; padding:0; cursor:pointer;
@@ -790,4 +854,22 @@ body.arranging .card.dragging{cursor:grabbing; z-index:20; filter:brightness(1.0
 /* 놓을 자리 표시 */
 body.arranging .desk.drop{
   box-shadow:0 5px 0 rgba(120,80,40,.45), 0 0 0 5px var(--accent);
+}
+/* ★ 지금이 «현재 배치» 상태라는 것을 한눈에.
+   교실 둘레를 노란 테를 둘러 평소 화면과 확실히 달라 보이게 합니다. */
+body.arranging #stage{
+  box-shadow:0 18px 60px rgba(0,0,0,.55),
+             0 0 0 4px #7a5c36,
+             0 0 0 11px var(--accent),
+             0 0 34px 10px rgba(255,207,92,.26);
+}
+/* 위쪽에 붙는 딱지 — 교실과 함께 커지거나 뒤집히면 안 되므로 화면에 붙입니다 */
+body.arranging #viewport::after{
+  content:'현재 배치 — 학생을 끌어서 자리를 바꿉니다';
+  position:absolute; top:9px; left:50%; transform:translateX(-50%);
+  z-index:6; pointer-events:none;
+  font-family:'NeoDunggeunmo',sans-serif; font-size:15px;
+  color:#3a2a10; background:var(--accent);
+  border:2px solid #d9a531; border-radius:999px;
+  padding:5px 16px; box-shadow:0 4px 12px rgba(0,0,0,.38);
 }

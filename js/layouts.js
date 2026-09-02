@@ -46,6 +46,24 @@ const Layouts = {
     return !!d.isShuffled && Object.keys(d.assignment).length > 0;
   },
 
+  /* ============================================================
+     지금 화면에 깔린 배치가 어느 칸에 저장된 것인지
+     ------------------------------------------------------------
+     «책상↔학생» 짝이 통째로 같으면 같은 배치로 봅니다.
+     그래서 불러온 뒤 한 명이라도 손으로 옮기면 불이 꺼집니다.
+     («저장해 둔 그 배치» 가 더는 아니니, 그게 맞습니다)
+     ============================================================ */
+  _key(pairs) {
+    return pairs.map(x => x[0] + '\u0001' + x[1]).sort().join('|');
+  },
+
+  /** 지금 배치의 열쇠. 아무도 안 앉아 있으면 null */
+  nowKey() {
+    const a = State.data.assignment, pairs = [];
+    for (const dk in a) if (a[dk]) pairs.push([dk, a[dk]]);
+    return pairs.length ? this._key(pairs) : null;
+  },
+
   /** 모두 공개되었는지 — 저장 버튼을 빛나게 할지 정합니다 */
   allRevealed() {
     const d = State.data;
@@ -154,16 +172,20 @@ const Layouts = {
   _renderPicker() {
     const box = $('#slotPicker');
     if (!box) return;
+    const now = this.nowKey();
     box.innerHTML = '';
     box.appendChild(el('div', { class: 'sp-title', text: '어느 칸에 저장할까요?' }));
 
     this.list().forEach((p, i) => {
+      const cur = !!(p && now && this._key(p.pairs) === now);
       const row = el('button', {
-        class: 'slot' + (p ? ' used' : ''),
+        class: 'slot' + (p ? ' used' : '') + (cur ? ' current' : ''),
+        title: cur ? '지금 화면의 배치와 같은 칸입니다' : '',
         onclick: () => { if (this.save(i)) this.closePicker(); },
       });
       row.appendChild(el('span', { class: 'slot-no', text: (i + 1) }));
       row.appendChild(el('span', { class: 'slot-name', text: p ? p.name : '비어 있음' }));
+      if (cur) row.appendChild(el('span', { class: 'slot-now', text: '지금' }));
       row.appendChild(el('span', { class: 'slot-sub', text: p ? this.summary(p) : '' }));
       box.appendChild(row);
     });
@@ -174,17 +196,21 @@ const Layouts = {
   _renderPanel() {
     const box = $('#slotList');
     if (!box) return;
+    const now = this.nowKey();
     box.innerHTML = '';
 
     this.list().forEach((p, i) => {
-      const row = el('div', { class: 'slot-item' + (p ? '' : ' empty') });
+      const cur = !!(p && now && this._key(p.pairs) === now);
+      const row = el('div', { class: 'slot-item' + (p ? '' : ' empty') + (cur ? ' current' : '') });
       const head = el('button', {
         class: 'slot-open',
-        title: p ? '이 배치를 불러옵니다' : '비어 있습니다',
+        title: cur ? '지금 화면에 깔린 배치입니다'
+             : p   ? '이 배치를 불러옵니다' : '비어 있습니다',
         onclick: () => p ? this.load(i) : toast('비어 있는 칸입니다'),
       });
       head.appendChild(el('span', { class: 'slot-no', text: (i + 1) }));
       head.appendChild(el('span', { class: 'slot-name', text: p ? p.name : '비어 있음' }));
+      if (cur) head.appendChild(el('span', { class: 'slot-now', text: '지금' }));
       row.appendChild(head);
 
       if (p) {

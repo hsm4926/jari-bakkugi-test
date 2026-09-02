@@ -69,6 +69,22 @@ const Panel = {
     if (!State.data.students.length) {
       box.appendChild(el('span', { class: 'hint', text: '아직 입력된 학생이 없습니다.' }));
     }
+    this.refreshSexTally();
+  },
+
+  /** 이름표 옆의 «남 12 · 여 13 (모두 25명)» — 누를 때마다 저절로 다시 셉니다 */
+  refreshSexTally() {
+    const node = $('#sexTally');
+    if (!node) return;
+    const st = State.data.students;
+    node.innerHTML = '';
+    if (!st.length) return;
+    const g = st.filter(s => s.sex === 'g').length;
+    const b = st.length - g;
+    node.appendChild(el('b', { class: 'b', text: `남 ${b}` }));
+    node.appendChild(el('span', { text: ' · ' }));
+    node.appendChild(el('b', { class: 'g', text: `여 ${g}` }));
+    node.appendChild(el('span', { class: 'all', text: `  (모두 ${st.length}명)` }));
   },
 
   /** 명단 글상자의 내용을 실제 학생 목록으로 바꿉니다 */
