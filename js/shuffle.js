@@ -196,8 +196,7 @@ const Shuffle = {
     this._revealToken++;      // 돌아가던 순차 공개가 있으면 여기서 멈춥니다
     Render.cards_();
     Render.setWobble(true);
-    Sound.play('page');
-    banner('다시 덮었습니다', 1800);
+    banner('다시 덮었습니다', 1800);   // 핵심 5개는 버튼 소리를 내지 않습니다
     State.save();
     Arrange.refreshSaveBtn();
   },

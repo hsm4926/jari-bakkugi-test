@@ -21,7 +21,7 @@ const Editor = {
   enter(mode) {
     // 둘 다 마우스로 끄는 모드라 겹치면 무엇을 끄는지 헷갈립니다.
     // (편집은 «책상» 을, 현재 배치는 «학생» 을 끕니다) 한 번에 하나만 켭니다.
-    if (typeof Arrange !== 'undefined' && Arrange.on) Arrange.exit();
+    if (typeof Arrange !== 'undefined' && Arrange.on) Arrange.exit(true);
     this.mode = mode;
     document.body.classList.add('editing');
     document.body.classList.toggle('show-grid', mode === 'layout' || CONFIG.view.showGridAlways);

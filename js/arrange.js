@@ -45,18 +45,19 @@ const Arrange = {
     $('#slotPanel').classList.remove('hidden');
     this._placePanel();
     banner('학생을 끌어서 자리를 바꿀 수 있습니다', 3200);
-    Sound.play('page');
+    Sound.play('click');
     State.save();
   },
 
-  exit() {
+  /** @param quiet 다른 모드가 «대신» 꺼 줄 때는 소리를 내지 않습니다 (클릭음이 겹칩니다) */
+  exit(quiet) {
     this.on = false;
     document.body.classList.remove('arranging');
     $('#btnArrange').classList.remove('active');
     $('#slotPanel').classList.add('hidden');
     this._drag = null;
     banner(null);
-    Sound.play('page');
+    if (!quiet) Sound.play('click');
     State.save();
   },
 
@@ -131,7 +132,7 @@ const Arrange = {
 
     Render.cards_();
     Render.setWobble(false);
-    Sound.play('click');
+    Sound.play('page');        // 자리를 «옮겨 놓는» 소리 — 설정 창과 같은 소리입니다
     State.save();
     Arrange.refreshSaveBtn();
   },

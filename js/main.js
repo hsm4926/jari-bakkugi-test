@@ -51,7 +51,7 @@ const View = {
     Render.all();
     // 편집 중이었다면 골라 둔 것의 표시를 되살립니다 (다시 그리면서 지워집니다)
     if (Editor.mode) Editor.select(Editor.sel);
-    Sound.play('page');
+    Sound.play('click');
     banner(this.flipped ? '교사 시점 — 아이들을 마주 본 방향입니다'
                         : '학생 시점 — 아이들이 TV 로 보는 방향입니다', 2600);
   },
@@ -393,8 +393,10 @@ function boot() {
 function wireEvents() {
 
   /* ---------- 툴바 ---------- */
-  // 이 세 개는 누른 직후 바로 자기 소리(섞는 소리·알 깨지는 소리)가 나므로
-  // 버튼 클릭음을 내면 겹쳐서 지저분해집니다. 그래서 클릭음을 내지 않습니다.
+  /* ★ 이 다섯 개(핵심 상자 안의 버튼들)는 «버튼 소리를 내지 않습니다».
+     누른 직후 바로 자기 연출 소리(섞는 소리·알 깨지는 소리)가 이어지므로
+     클릭음을 얹으면 겹쳐서 지저분합니다.
+     나머지 버튼은 전부 'click', 설정·알림창은 'page' — 규칙은 config.js 에 적어 뒀습니다. */
   $('#btnShuffle').onclick    = () => Shuffle.run();
   $('#btnRevealSeq').onclick  = () => Shuffle.revealAll('seq');    // 앞자리부터 차례대로
   $('#btnRevealRand').onclick = () => Shuffle.revealAll('random'); // 뒤죽박죽 순서로

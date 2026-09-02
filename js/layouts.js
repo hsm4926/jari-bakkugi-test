@@ -83,7 +83,7 @@ const Layouts = {
     State.save();
     this.render();
     toast(`${i + 1}번 칸에 이번 자리를 저장했습니다`);
-    Sound.play('page');
+    Sound.play('click');
     return true;
   },
 
@@ -124,7 +124,7 @@ const Layouts = {
     banner(`${p.name} — 저장해 둔 자리입니다`, 3200);
     toast(lost ? `${ok.length}명을 되살렸습니다 (${lost}명은 빠졌습니다)`
                : `${ok.length}명의 자리를 되살렸습니다`);
-    Sound.play('page');
+    Sound.play('click');
   },
 
   /* ---------------- 이름 바꾸기 · 지우기 ---------------- */
@@ -230,12 +230,14 @@ const Layouts = {
     if (!this.canSave()) { toast('먼저 자리 섞기를 해주세요'); return; }
     this._renderPicker();
     $('#slotPicker').classList.remove('hidden');
-    Sound.play('page');
+    Sound.play('click');
   },
 
   closePicker() { $('#slotPicker').classList.add('hidden'); },
 
   togglePicker() {
-    $('#slotPicker').classList.contains('hidden') ? this.openPicker() : this.closePicker();
+    if ($('#slotPicker').classList.contains('hidden')) { this.openPicker(); return; }
+    this.closePicker();
+    Sound.play('click');   // closePicker 자체는 조용합니다 (다른 곳에서도 부르므로)
   },
 };

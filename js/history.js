@@ -60,7 +60,7 @@ const History = {
     if (!this._undo.length) { toast('되돌릴 것이 없습니다'); return; }
     this._redo.push(this._snap());
     this._apply(this._undo.pop());
-    Sound.play('page');
+    Sound.play('click');
     toast('되돌렸습니다');
   },
 
@@ -68,7 +68,7 @@ const History = {
     if (!this._redo.length) { toast('다시 할 것이 없습니다'); return; }
     this._undo.push(this._snap());
     this._apply(this._redo.pop());
-    Sound.play('page');
+    Sound.play('click');
     toast('다시 했습니다');
   },
 
