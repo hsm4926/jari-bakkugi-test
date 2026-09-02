@@ -40,10 +40,39 @@ const Layouts = {
     };
   },
 
-  /** 지금 저장할 수 있는 상태인지 (섞어서 앉은 사람이 있어야 합니다) */
+  /** 섞어서 앉은 사람이 있는지 — 저장 버튼을 «보여 줄지» 를 정합니다 */
   canSave() {
     const d = State.data;
     return !!d.isShuffled && Object.keys(d.assignment).length > 0;
+  },
+
+  /**
+   * 지금 «정말로» 저장해도 되는지.
+   * ★ 아직 알에 덮여 있는 자리가 있으면 저장하지 않습니다.
+   *   덮인 채로 저장하면 아이들 앞에서 아직 안 깐 자리까지 파일에 들어가고,
+   *   무엇보다 «이번 자리» 가 확정되기 전이라 저장할 내용이 아닙니다.
+   */
+  canSaveNow() { return this.canSave() && this.allRevealed(); },
+
+  /**
+   * 아직 안 되는 이유를 알려 주고 true 를 돌려줍니다 (막아야 하면).
+   *
+   * 안내는 «작은 토스트» 가 아니라 **화면 가운데 아래 큰 띠**로 냅니다.
+   * 버튼은 화면 맨 위에 있는데 토스트는 오른쪽 구석에 뜨는 작은 알약이라,
+   * 「눌렀는데 아무 일도 안 일어났다」 로 보이기 쉽습니다.
+   */
+  _blocked() {
+    if (!this.canSave()) {
+      banner('먼저 자리 섞기를 해주세요', 2600);
+      Sound.play('click');
+      return true;
+    }
+    if (!this.allRevealed()) {
+      banner('자리를 모두 공개한 뒤에 저장할 수 있습니다', 3000);
+      Sound.play('click');
+      return true;
+    }
+    return false;
   },
 
   /* ============================================================
@@ -73,7 +102,7 @@ const Layouts = {
 
   /* ---------------- 저장 ---------------- */
   save(i) {
-    if (!this.canSave()) { toast('먼저 자리 섞기를 해주세요'); return false; }
+    if (this._blocked()) return false;
     const list = this.list();
     const old = list[i];
     if (old && !confirm(`${i + 1}번 칸에 이미 「${old.name}」 이(가) 있습니다.\n지금 배치로 덮어쓸까요?`)) {
@@ -227,7 +256,7 @@ const Layouts = {
   },
 
   openPicker() {
-    if (!this.canSave()) { toast('먼저 자리 섞기를 해주세요'); return; }
+    if (this._blocked()) return;
     this._renderPicker();
     $('#slotPicker').classList.remove('hidden');
     Sound.play('click');

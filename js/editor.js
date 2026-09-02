@@ -96,7 +96,8 @@ const Editor = {
 
     /* 사전 자리 정하기: 책상을 누르면 학생 고르기 팝업 */
     if (this.mode === 'preset') {
-      if (kind === 'desk') { Sound.play('click'); Picker.open(id, e.clientX, e.clientY); }
+      // 소리는 «버튼» 을 누를 때만 냅니다. 책상은 버튼이 아니라 교실의 물건입니다.
+      if (kind === 'desk') Picker.open(id, e.clientX, e.clientY);
       return true;
     }
 
@@ -233,8 +234,8 @@ const Editor = {
     History.push();
     if (want) dk.sex = want; else delete dk.sex;
 
-    Sound.play('click');
     Render.paintDeskSex(deskId);                  // 그 책상 하나만 다시 칠합니다
+    // 여기서도 소리를 내지 않습니다 — 책상을 쭉 훑어 칠할 때 딸깍이 연발돼 시끄럽습니다
     this.afterSexChange();
   },
 

@@ -153,8 +153,9 @@ const Arrange = {
     if (!btn) return;
     const can = Layouts.canSave();
     btn.classList.toggle('hidden', !can);
-    btn.classList.toggle('ready', can && Layouts.allRevealed());
-    if (!can) Layouts.closePicker();
+    // 아직 다 공개되지 않았으면 눌렀을 때 알려 줍니다 (Layouts._blocked).
+    // 예전처럼 버튼을 빛나게 하지는 않습니다 — 툴바에 노란 것이 늘면 어지럽습니다.
+    if (!can || !Layouts.allRevealed()) Layouts.closePicker();
     // 자리가 바뀌면 «지금 배치» 노란 불도 따라 옮겨 가야 합니다
     Layouts.render();
   },
