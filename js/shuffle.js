@@ -38,6 +38,7 @@ const Shuffle = {
     if (Seats.blockShuffle()) return;
 
     if (Editor.mode) Editor.exit();
+    if (Arrange.on) Arrange.exit();
 
     this.busy = true;
     document.body.classList.add('busy');
@@ -86,6 +87,7 @@ const Shuffle = {
     document.body.classList.remove('busy');
     State.save();
     Panel.refreshCounts();
+    Arrange.refreshSaveBtn();
   },
 
   /* ============================================================
@@ -124,6 +126,7 @@ const Shuffle = {
     State.save();
     this._pending--;
     this.checkAllRevealed();
+    Arrange.refreshSaveBtn();
   },
 
   /* ============================================================
@@ -181,6 +184,7 @@ const Shuffle = {
 
     State.save();
     this.checkAllRevealed();
+    Arrange.refreshSaveBtn();
   },
 
   reset() {
@@ -195,6 +199,7 @@ const Shuffle = {
     Sound.play('page');
     banner('다시 덮었습니다', 1800);
     State.save();
+    Arrange.refreshSaveBtn();
   },
 
   /* ============================================================

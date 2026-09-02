@@ -289,8 +289,11 @@ const Panel = {
     r.onload = () => {
       try {
         State.importText(String(r.result));
+        if (Arrange.on) Arrange.exit();
         Render.all();
         this.syncFromState();
+        Layouts.render();
+        Arrange.refreshSaveBtn();
         Sound.setOn(State.data.settings.sound);
         Sound.setMaster(State.data.settings.volume);
         toast('설정을 불러왔습니다');
@@ -304,9 +307,12 @@ const Panel = {
 
   wipe() {
     if (!confirm('학생 명단과 자리 배치를 모두 지우고 처음 상태로 되돌립니다.\n정말 진행할까요?')) return;
+    if (Arrange.on) Arrange.exit();
     State.wipe();
     Render.all();
     this.syncFromState();
+    Layouts.render();
+    Arrange.refreshSaveBtn();
     toast('처음 상태로 되돌렸습니다');
   },
 };

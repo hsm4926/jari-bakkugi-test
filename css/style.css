@@ -693,3 +693,101 @@ body.show-sex .desk.sex-g .sex-no{
   .tb-center .btn{font-size:14px; padding:7px 9px}
   .zoom-box{display:none}         /* 확대·축소는 +/- 키와 휠로도 됩니다 */
 }
+
+/* ============================================================
+   지금 자리 배치 저장 (5칸)
+   ============================================================ */
+/* 저장 버튼 — 뒤집기와 같은 크기로 작게. 모두 공개되면 빛납니다. */
+#btnSaveLayout{align-self:center; padding:7px 11px}
+#btnSaveLayout.ready{
+  background:var(--accent); border-color:#d9a531; color:#3a2a10;
+  animation:saveGlow 1.7s ease-in-out infinite;
+}
+@keyframes saveGlow{
+  0%,100%{box-shadow:0 0 0 0 rgba(255,207,92,0)}
+  50%    {box-shadow:0 0 0 7px rgba(255,207,92,.30)}
+}
+
+/* 툴바 아래로 내려오는 «어느 칸에 저장할까요?» */
+#slotPicker{
+  position:absolute; top:64px; left:50%; transform:translateX(-50%);
+  z-index:45; width:min(460px, 92vw);
+  background:#2c2434; border:3px solid #5c4d6b; border-radius:12px;
+  box-shadow:0 14px 40px rgba(0,0,0,.55);
+  padding:12px;
+  animation:slotDrop .18s ease;
+}
+@keyframes slotDrop{from{opacity:0; transform:translateX(-50%) translateY(-8px)}
+                    to  {opacity:1; transform:translateX(-50%) translateY(0)}}
+#slotPicker .sp-title{
+  font-family:'NeoDunggeunmo',sans-serif; font-size:16px; color:var(--accent);
+  margin-bottom:9px; text-align:center;
+}
+#slotPicker .hint{margin:9px 2px 0; text-align:center}
+
+.slot{
+  display:flex; align-items:center; gap:10px; width:100%;
+  padding:9px 11px; margin-bottom:6px;
+  background:#3b3145; border:2px solid #4b3f58; border-radius:8px;
+  color:var(--ink); font-family:inherit; font-size:15px; cursor:pointer;
+  text-align:left;
+}
+.slot:hover{background:#4a3e58; border-color:var(--accent)}
+.slot.used{border-color:#6d5d7c}
+.slot-no{
+  flex:none; width:26px; height:26px; border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  background:#241d2b; border:2px solid #5c4d6b;
+  font-family:'NeoDunggeunmo',sans-serif; font-size:14px; color:var(--accent);
+}
+.slot-name{flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.slot-sub{font-size:12px; color:var(--ink-dim); white-space:nowrap}
+
+/* ---------------- 떠다니는 목록 창 ---------------- */
+#slotPanel{
+  position:fixed; z-index:46; width:232px;
+  background:#2c2434; border:3px solid #5c4d6b; border-radius:12px;
+  box-shadow:0 12px 34px rgba(0,0,0,.5);
+  overflow:hidden;
+}
+.sp-head{
+  display:flex; align-items:center; gap:6px;
+  padding:7px 8px 7px 12px;
+  background:#3b3145; border-bottom:2px solid #4b3f58;
+  cursor:grab; user-select:none;
+}
+.sp-head:active{cursor:grabbing}
+.sp-name{
+  flex:1; font-family:'NeoDunggeunmo',sans-serif; font-size:14px; color:var(--accent);
+}
+#spFold{padding:2px 7px; min-width:0; font-size:13px}
+.sp-body{padding:8px; max-height:52vh; overflow-y:auto}
+#slotPanel.folded .sp-body{display:none}
+
+.slot-item{
+  border:2px solid #4b3f58; border-radius:8px; padding:6px 7px; margin-bottom:6px;
+  background:#332a3d;
+}
+.slot-item.empty{opacity:.5}
+.slot-item:last-child{margin-bottom:0}
+.slot-open{
+  display:flex; align-items:center; gap:8px; width:100%;
+  background:none; border:none; padding:0; cursor:pointer;
+  color:var(--ink); font-family:inherit; font-size:14px; text-align:left;
+}
+.slot-item:not(.empty) .slot-open:hover .slot-name{color:var(--accent)}
+.slot-item .slot-sub{margin:4px 0 0 34px; white-space:normal; line-height:1.4}
+.slot-btns{display:flex; gap:5px; margin:6px 0 0 34px}
+.slot-btns .btn{font-size:12px; padding:3px 8px}
+
+/* ============================================================
+   «현재 배치» 모드 — 학생을 끌어서 자리 바꾸기
+   ============================================================ */
+body.arranging #cardLayer{pointer-events:none}
+body.arranging .card{pointer-events:auto; cursor:grab}
+body.arranging .card:hover .nametag{border-color:var(--accent); background:#fff7e0}
+body.arranging .card.dragging{cursor:grabbing; z-index:20; filter:brightness(1.08)}
+/* 놓을 자리 표시 */
+body.arranging .desk.drop{
+  box-shadow:0 5px 0 rgba(120,80,40,.45), 0 0 0 5px var(--accent);
+}

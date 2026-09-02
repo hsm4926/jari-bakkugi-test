@@ -298,7 +298,8 @@ const Render = {
       layer.appendChild(card);
       this.cards[dk.id] = { root: card, in: inner, egg, studentId: sid, index: idx };
 
-      if (State.data.revealed[dk.id]) this.showStudent(dk.id, false);
+      // «현재 배치» 모드에서는 아직 안 연 자리도 학생으로 보여 줍니다
+      if (State.data.revealed[dk.id] || Arrange.on) this.showStudent(dk.id, false);
     });
 
     this.seatNumbers();

@@ -51,6 +51,11 @@ const State = {
       useGroups: true,     // 모둠으로 묶어 앉힐지 (false 면 책상만 줄 맞춰 놓습니다)
       // 프리셋 목록. 바로 위의 preset(미리 정해둔 자리)과 이름이 비슷하니 헷갈리지 마세요.
       presets: [],         // [{ id, name, savedAt, data:{교실+명단+사전자리} }]
+      /* 섞어서 나온 «지금 이 자리 배치» 를 넣어 두는 칸 5개.
+         비어 있으면 null. 각 칸: { name, savedAt, pairs:[[책상id, 학생id, 이름]...] }
+         ⚠️ 위의 preset(사전에 정해둔 자리)·presets(교실 통째 저장)와 다른 것입니다.
+            이건 «이미 섞여 나온 결과» 를 그대로 기억해 두는 곳입니다. */
+      layouts: [null, null, null, null, null],
       settings: {
         sound: CONFIG.sound.on,
         volume: CONFIG.sound.masterVolume,
@@ -84,6 +89,8 @@ const State = {
     ['groups', 'desks', 'lockers', 'students', 'presets'].forEach(k => {
       if (!Array.isArray(out[k])) out[k] = base[k];
     });
+    // 배치 칸은 언제나 5개여야 합니다 (예전 저장 자료에는 아예 없습니다)
+    out.layouts = this.fixLayouts(d.layouts);
     ['preset', 'assignment', 'revealed'].forEach(k => {
       if (!out[k] || typeof out[k] !== 'object') out[k] = {};
     });
@@ -184,6 +191,13 @@ const State = {
     const x2 = Math.max(...ds.map(d => d.x + CONFIG.desk.width)) + pad;
     const y2 = Math.max(...ds.map(d => d.y + CONFIG.desk.height)) + pad + 14;
     return { x: x1, y: y1, w: x2 - x1, h: y2 - y1 };
+  },
+
+  /** 배치 칸을 언제나 5개짜리 배열로 맞춰 줍니다 */
+  fixLayouts(list) {
+    const out = Array.isArray(list) ? list.slice(0, Layouts.SLOTS) : [];
+    while (out.length < Layouts.SLOTS) out.push(null);
+    return out.map(x => (x && Array.isArray(x.pairs)) ? x : null);
   },
 
   /** 사전 자리로 이미 정해진 학생 id 모음 */

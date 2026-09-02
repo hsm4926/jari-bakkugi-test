@@ -34,7 +34,9 @@ const Presets = {
       desks: d.desks,
       useGroups: d.useGroups !== false,
       students: d.students,
-      preset: d.preset,        // 미리 정해둔 자리
+      preset: d.preset,          // 미리 정해둔 자리
+      assignment: d.assignment,  // 지금 앉아 있는 자리 (섞은 결과)
+      layouts: d.layouts,        // 칸에 저장해 둔 배치 5개
     }));
   },
 
@@ -92,19 +94,33 @@ const Presets = {
     d.students  = s.students  || [];
     d.preset    = s.preset    || {};
 
-    // 이번에 섞은 결과는 프리셋에 들어 있지 않으므로 깨끗한 상태로 시작합니다
-    d.assignment = {}; d.revealed = {}; d.isShuffled = false;
+    /* 저장해 둔 배치와 «지금 앉은 자리» 도 함께 되살립니다.
+       배치가 들어 있으면 이미 아는 자리이므로 덮지 않고 바로 보여 줍니다. */
+    d.layouts = State.fixLayouts(s.layouts);
+    d.assignment = {};
+    d.revealed = {};
+    const deskIds = new Set(d.desks.map(x => x.id));
+    const stuIds  = new Set(d.students.map(x => x.id));
+    for (const dk in (s.assignment || {})) {
+      const sid = s.assignment[dk];
+      if (deskIds.has(dk) && stuIds.has(sid)) { d.assignment[dk] = sid; d.revealed[dk] = true; }
+    }
+    d.isShuffled = Object.keys(d.assignment).length > 0;
     Shuffle._pending = 0;
-    Shuffle._finished = false;
+    Shuffle._finished = true;
     Shuffle._revealToken++;      // 돌아가던 순차 공개가 있으면 멈춥니다
+    if (Arrange.on) Arrange.exit();
 
     if (Editor.mode) Editor.exit();
     Render.all();
     if (roomChanged) View.fit();  // 교실 크기가 달라졌으면 화면에 다시 맞춥니다
     Panel.syncFromState();
+    Layouts.render();
+    Arrange.refreshSaveBtn();
     State.save();
     toast(`「${p.name}」 을(를) 불러왔습니다`);
-    banner(`${p.name} — 자리 섞기를 눌러 주세요`, 3000);
+    banner(d.isShuffled ? `${p.name} — 저장해 둔 자리입니다`
+                        : `${p.name} — 자리 섞기를 눌러 주세요`, 3000);
   },
 
   /* ---------------- 이름 바꾸기 · 지우기 ---------------- */
@@ -190,6 +206,8 @@ const Presets = {
     const sg = (s.desks || []).filter(x => x.sex === 'g').length;
     if (sb || sg) bits.push(`남자 ${sb} · 여자 ${sg} 자리`);
     if (fixed) bits.push(`사전 자리 ${fixed}`);
+    const saved = (s.layouts || []).filter(Boolean).length;
+    if (saved) bits.push(`저장 배치 ${saved}`);
 
     if (p.savedAt) {
       const d = new Date(p.savedAt);
