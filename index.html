@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="theme-color" content="#2c2434">
+<meta name="description" content="초등학교 교실용 자리 바꾸기 프로그램. 알을 깨서 한 명씩 자리를 공개합니다.">
+<link rel="manifest" href="manifest.webmanifest?v=1.8.3">
+<link rel="apple-touch-icon" href="icons/icon-180.png?v=1.8.3">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="자리 바꾸기">
+<title>[테스트] 우리 반 자리 바꾸기</title>
+<link rel="icon" href="assets/sprites/desk-icon.png?v=1.8.3">
+<link rel="stylesheet" href="css/fonts.css?v=1.8.3">
+<link rel="stylesheet" href="css/style.css?v=1.8.3">
+<style>
+  .tb-test{
+    font-family:'NeoDunggeunmo',sans-serif; font-size:13px;
+    background:#c2372a; color:#fff; border:2px solid #e86a5c;
+    border-radius:6px; padding:3px 8px; margin-left:6px; align-self:center;
+  }
+  body::after{
+    content:''; position:fixed; inset:0; pointer-events:none; z-index:999;
+    border:3px solid #c2372a;
+  }
+</style>
+</head>
+<body>
+
+<!-- ===================== 시작 화면 ===================== -->
+<!-- 브라우저는 사용자가 직접 누르지 않으면 전체 화면으로 못 바꿉니다.
+     그래서 시작 버튼을 한 번 누르는 것으로 전체 화면을 켭니다. -->
+<div id="startCover">
+  <div class="sc-box">
+    <div class="sc-cast">
+      <img src="assets/sprites/student/boy1-3.png?v=1.8.3" alt="">
+      <img src="assets/sprites/egg/01.png?v=1.8.3" class="sc-egg" alt="">
+      <img src="assets/sprites/student/girl1-1.png?v=1.8.3" alt="">
+    </div>
+    <div class="sc-title">우리 반 자리 바꾸기</div>
+    <div class="sc-ver" id="scVer"></div>
+    <button id="scStart" class="btn btn-main sc-btn">전체 화면으로 시작</button>
+    <button id="scPlain" class="sc-plain">그냥 시작하기</button>
+    <div class="sc-tip">전체 화면은 <b>F11</b> 로도 켜고 끌 수 있습니다</div>
+  </div>
+</div>
+
+<!-- ===================== 상단 툴바 ===================== -->
+<header id="toolbar">
+  <div class="tb-left">
+    <img class="tb-icon" src="assets/sprites/desk-icon.png?v=1.8.3" alt="">
+    <span class="tb-title">우리 반 자리 바꾸기</span>
+    <span class="tb-ver" id="tbVer"></span><span class="tb-test">테스트</span>
+  </div>
+
+  <div class="tb-center">
+    <button id="btnShuffle" class="btn btn-main">자리 섞기</button>
+    <button id="btnRevealSeq" class="btn">순서대로 공개</button>
+    <button id="btnRevealRand" class="btn">랜덤 공개</button>
+    <button id="btnRevealNow" class="btn">한 번에 공개</button>
+    <button id="btnReset" class="btn btn-ghost">다시 덮기</button>
+  </div>
+
+  <div class="tb-right">
+    <div class="zoom-box">
+      <button id="btnZoomOut" class="btn btn-icon" title="축소">－</button>
+      <span id="zoomLabel">100%</span>
+      <button id="btnZoomIn" class="btn btn-icon" title="확대">＋</button>
+      <button id="btnZoomFit" class="btn btn-icon" title="화면에 맞추기">⤢</button>
+    </div>
+    <button id="btnEdit" class="btn">교실 편집</button>
+    <button id="btnPanel" class="btn">설정</button>
+    <button id="btnFull" class="btn btn-icon" title="전체 화면 (F11)">⛶</button>
+  </div>
+</header>
+
+<!-- ===================== 편집 모드 서브 툴바 ===================== -->
+<div id="editbar" class="hidden">
+  <div class="eb-group">
+    <span class="eb-label">편집 대상</span>
+    <button class="btn btn-sm eb-mode active" data-editmode="layout">자리 배치</button>
+    <button class="btn btn-sm eb-mode" data-editmode="preset">사전 자리 정하기</button>
+  </div>
+
+  <div class="eb-group" id="ebLayoutTools">
+    <span class="eb-label">추가</span>
+    <button id="btnAddGroup" class="btn btn-sm">모둠</button>
+    <button id="btnAddDesk" class="btn btn-sm">책상</button>
+    <button id="btnAddLocker" class="btn btn-sm">사물함</button>
+    <span class="eb-sep"></span>
+    <button id="btnDelete" class="btn btn-sm btn-danger">선택한 것 삭제</button>
+    <button id="btnAutoArrange" class="btn btn-sm">처음 배치로 되돌리기</button>
+  </div>
+
+  <div class="eb-hint" id="ebHint">
+    책상을 끌어서 옮기세요. 모둠 이름표를 끌면 모둠 전체가 움직입니다.
+  </div>
+</div>
+
+<!-- ===================== 교실 화면 ===================== -->
+<main id="viewport">
+  <div id="stage">
+    <div id="gridLayer"></div>
+    <div id="roomLayer"></div>   <!-- 칠판 · 사물함 -->
+    <div id="groupLayer"></div>  <!-- 모둠 영역 · 이름표 -->
+    <div id="deskLayer"></div>   <!-- 책상 -->
+    <div id="cardLayer"></div>   <!-- 알 / 학생 카드 -->
+    <div id="fxLayer"></div>     <!-- 이펙트 -->
+  </div>
+</main>
+
+<!-- ===================== 상태 배너 ===================== -->
+<div id="banner" class="hidden"><span id="bannerText"></span></div>
+
+<!-- ===================== 설정 패널 ===================== -->
+<aside id="panel" class="hidden">
+  <div class="panel-head">
+    <div class="panel-tabs">
+      <button class="ptab active" data-tab="students">학생 명단</button>
+      <button class="ptab" data-tab="room">교실</button>
+      <button class="ptab" data-tab="presets">프리셋</button>
+      <button class="ptab" data-tab="save">저장 · 불러오기</button>
+    </div>
+    <button id="btnPanelClose" class="btn btn-icon" title="닫기">✕</button>
+  </div>
+
+  <div class="panel-body">
+
+    <!-- ===== 학생 명단 ===== -->
+    <section class="ptab-page" data-page="students">
+
+      <div class="sec">
+        <h3>학생 이름</h3>
+        <div class="sec-body">
+          <p class="hint">한 줄에 한 명씩 적어주세요. 붙여넣기도 됩니다.</p>
+          <textarea id="nameInput" spellcheck="false"
+            placeholder="김하늘&#10;박서준&#10;이유나&#10;..."></textarea>
+          <div class="row">
+            <button id="btnApplyNames" class="btn btn-main">명단 적용</button>
+            <span id="nameCount" class="count">0명</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="sec">
+        <h3>성별 <span class="sub">(캐릭터 모습이 달라집니다)</span></h3>
+        <div class="sec-body">
+          <p class="hint">이름을 눌러 <b>남 ↔ 여</b> 를 바꿉니다.</p>
+          <div id="studentChips" class="chips"></div>
+          <div class="row">
+            <button id="btnAllBoy" class="btn btn-sm">전부 남</button>
+            <button id="btnAllGirl" class="btn btn-sm">전부 여</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="warn hidden" id="countWarn"></div>
+    </section>
+
+    <!-- ===== 교실 ===== -->
+    <section class="ptab-page hidden" data-page="room">
+
+      <div class="sec">
+        <h3>모둠 구성</h3>
+        <div class="sec-body">
+          <div class="field">
+            <label>모둠</label>
+            <div class="seg">
+              <button id="btnGroupsOn"  class="btn btn-sm seg-btn">있음</button>
+              <button id="btnGroupsOff" class="btn btn-sm seg-btn">없음</button>
+            </div>
+          </div>
+
+          <div id="groupFields">
+            <div class="field">
+              <label>모둠 개수</label>
+              <input type="number" id="inGroups" min="1" max="12" step="1">
+            </div>
+            <div class="field">
+              <label>모둠당 책상 수</label>
+              <input type="number" id="inSeats" min="1" max="8" step="1">
+            </div>
+          </div>
+
+          <div id="plainFields" class="hidden">
+            <div class="field">
+              <label>책상 수</label>
+              <input type="number" id="inDeskCount" min="1" max="60" step="1">
+            </div>
+            <p class="hint">모둠 없이 책상만 줄 맞춰 놓습니다. 만든 뒤 <b>교실 편집</b> 에서
+              하나씩 끌어 옮기거나 늘릴 수 있습니다.</p>
+          </div>
+
+          <div class="row"><button id="btnRebuild" class="btn btn-main">이 구성으로 교실 다시 만들기</button></div>
+          <p class="hint">지금 배치와 사전에 정해둔 자리가 모두 지워집니다.</p>
+        </div>
+      </div>
+
+      <div class="sec">
+        <h3>교실 크기</h3>
+        <div class="sec-body">
+          <div class="field">
+            <label>가로</label>
+            <input type="number" id="inRoomW" min="400" max="4000" step="20">
+          </div>
+          <div class="field">
+            <label>세로</label>
+            <input type="number" id="inRoomH" min="400" max="4000" step="20">
+          </div>
+          <div class="row"><button id="btnRoomDefault" class="btn btn-sm">기본 크기로 되돌리기</button></div>
+          <p class="hint">기본 크기는 교실 TV(1920×1080)를 전체 화면으로 썼을 때
+            100% 배율에서 화면이 거의 꽉 차도록 맞춘 값입니다.</p>
+        </div>
+      </div>
+
+      <div class="sec">
+        <h3>소리</h3>
+        <div class="sec-body">
+          <div class="field">
+            <label>효과음</label>
+            <label class="switch"><input type="checkbox" id="inSound"><span></span></label>
+          </div>
+          <div class="field">
+            <label>볼륨</label>
+            <input type="range" id="inVolume" min="0" max="1" step="0.05">
+          </div>
+        </div>
+      </div>
+
+      <div class="sec teacher">
+        <h3 class="teacher-only">지금 공개 방식 <span class="sub">선생님만</span></h3>
+        <div class="sec-body">
+          <div id="modeReadout" class="mode-readout">무작위</div>
+          <p class="hint">화면 왼쪽 아래 구석을 <b>길게 누르면</b> 방식이 바뀝니다. (Ctrl+Shift+M 도 가능)</p>
+        </div>
+      </div>
+
+      <div class="sec teacher">
+        <h3 class="teacher-only">표시점 모양 <span class="sub">선생님만</span></h3>
+        <div class="sec-body">
+          <p class="hint">화면 <b>왼쪽 맨 아래 구석</b>의 작은 점입니다. 바꾸면 곧바로 화면에 반영되니
+            그 구석을 보면서 맞추세요. 평소에는 «사전 설정» 일 때만 보이므로,
+            조절하는 동안에는 <b>미리 보기</b> 를 켜 두세요.</p>
+          <div class="row">
+            <button id="btnDotPreview" class="btn btn-sm">미리 보기 켜기</button>
+            <button id="btnDotReset" class="btn btn-sm">기본값으로</button>
+          </div>
+          <div class="field">
+            <label>안쪽 색</label>
+            <input type="color" id="inDotFill">
+          </div>
+          <div class="field">
+            <label>안쪽 진하기</label>
+            <input type="range" id="inDotFillA" min="0" max="1" step="0.01">
+            <span id="outDotFillA" class="count num"></span>
+          </div>
+          <div class="field">
+            <label>테두리 색</label>
+            <input type="color" id="inDotRing">
+          </div>
+          <div class="field">
+            <label>테두리 진하기</label>
+            <input type="range" id="inDotRingA" min="0" max="1" step="0.01">
+            <span id="outDotRingA" class="count num"></span>
+          </div>
+          <div class="field">
+            <label>테두리 두께</label>
+            <input type="range" id="inDotRingW" min="0" max="5" step="0.1">
+            <span id="outDotRingW" class="count num"></span>
+          </div>
+          <div class="field">
+            <label>점 크기</label>
+            <input type="range" id="inDotSize" min="4" max="24" step="1">
+            <span id="outDotSize" class="count num"></span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== 프리셋 ===== -->
+    <section class="ptab-page hidden" data-page="presets">
+
+      <div class="sec">
+        <h3>지금 교실을 프리셋으로 저장</h3>
+        <div class="sec-body">
+          <p class="hint"><b>책상 배치 · 학생 명단 · 사전에 정해둔 자리</b>가 함께 저장됩니다.
+            («3학년 2반 1학기», «모둠 없는 시험 대형» 처럼 이름을 붙여 두세요)</p>
+          <div class="row">
+            <input type="text" id="inPresetName" maxlength="24" placeholder="프리셋 이름">
+            <button id="btnPresetSave" class="btn btn-main">지금 상태 저장</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="sec">
+        <h3>저장해 둔 프리셋 <span id="presetCount" class="sub"></span></h3>
+        <div class="sec-body">
+          <div id="presetList"></div>
+          <p class="hint">불러오면 지금 배치와 명단이 프리셋 내용으로 <b>바뀝니다</b>.
+            섞은 결과와 공개 방식은 프리셋에 들어 있지 않습니다.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== 저장 · 불러오기 ===== -->
+    <section class="ptab-page hidden" data-page="save">
+
+      <div class="sec">
+        <h3>자동 저장</h3>
+        <div class="sec-body">
+          <p class="hint">명단·자리 배치·사전에 정해둔 자리는 이 컴퓨터에 자동으로 저장됩니다.
+            껐다 켜도 그대로 남아 있습니다.</p>
+          <div id="savedAt" class="count">아직 저장된 적 없음</div>
+        </div>
+      </div>
+
+      <div class="sec">
+        <h3>파일로 백업하기</h3>
+        <div class="sec-body">
+          <p class="hint">USB 로 옮기거나, 컴퓨터가 초기화돼도 되살릴 수 있게 파일로 저장해 두세요.
+            프리셋도 함께 들어갑니다.</p>
+          <div class="row">
+            <button id="btnExport" class="btn btn-main">설정 파일로 내보내기</button>
+            <button id="btnImport" class="btn">파일에서 불러오기</button>
+            <input type="file" id="fileInput" accept=".json" hidden>
+          </div>
+        </div>
+      </div>
+
+      <div class="sec danger">
+        <h3>초기화</h3>
+        <div class="sec-body">
+          <p class="hint">명단 · 배치 · 사전 자리 · 프리셋이 <b>전부</b> 지워집니다.</p>
+          <div class="row"><button id="btnWipe" class="btn btn-danger">전부 지우고 처음 상태로</button></div>
+        </div>
+      </div>
+    </section>
+
+  </div>
+</aside>
+
+<!-- 사전 자리 정하기 — 학생 고르는 팝업 -->
+<div id="picker" class="hidden">
+  <div class="picker-head"><span id="pickerTitle">학생 고르기</span><button id="pickerClose" class="btn btn-icon">✕</button></div>
+  <div id="pickerList" class="picker-list"></div>
+</div>
+
+<!-- 선생님 전용: 왼쪽 아래 구석 (화면엔 보이지 않음) -->
+<div id="secretHotspot"><div id="modeDot"></div></div>
+
+<div id="toast" class="hidden"></div>
+
+<script src="version.js?v=1.8.3"></script>
+<script src="config.js?v=1.8.3"></script>
+<script src="js/util.js?v=1.8.3"></script>
+<script src="js/audio.js?v=1.8.3"></script>
+<script src="js/state.js?v=1.8.3"></script>
+<script src="js/layout.js?v=1.8.3"></script>
+<script src="js/render.js?v=1.8.3"></script>
+<script src="js/editor.js?v=1.8.3"></script>
+<script src="js/shuffle.js?v=1.8.3"></script>
+<script src="js/panel.js?v=1.8.3"></script>
+<script src="js/presets.js?v=1.8.3"></script>
+<script src="js/main.js?v=1.8.3"></script>
+<script>
+/* 서비스 워커 등록 — 인터넷이 끊겨도 열리게 해 줍니다. 실패해도 프로그램은 그대로 돌아갑니다. */
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function () {
+    navigator.serviceWorker.register('sw.js').catch(function () {});
+  });
+}
+</script>
+</body>
+</html>
