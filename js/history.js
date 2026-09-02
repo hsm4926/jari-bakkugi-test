@@ -93,7 +93,6 @@ const History = {
     if (roomChanged) View.fit();
     if (Editor.mode) Editor.select(null);
     Editor.refreshSexCount();
-    Editor.refreshSnapBtn();
     Editor.refreshDeskSize();
     Panel.refreshCounts();
     Panel.syncFromState();

@@ -95,9 +95,18 @@ const Render = {
     Object.assign(tag.style, { width: 'auto', fontSize: fs + 'px' });
     const host = el('div', { class: 'card' }, el('div', { class: 'card-in' }, tag));
     Object.assign(host.style, { visibility: 'hidden', left: '-9999px', top: '0' });
-    ($('#cardLayer') || document.body).appendChild(host);
-    const w = (tag.offsetWidth - 38) / 3 || fs;   // 38 = 좌우 여백 30 + 테두리 8
+    /* 🩸 «화면에 안 붙은 곳» 에 두면 안 됩니다.
+       예전에 #cardLayer 안에 넣었다가 크게 당했습니다 —
+       교실 편집 중에는 `body.editing #cardLayer{display:none}` 이라
+       재 보면 폭이 0 이 나오고, 그 값이 그대로 캐시에 남아
+       **이름표 칸이 0px 이 되어 글씨가 잘려 나갔습니다.**
+       (책상 크기를 한 번 바꾸면 이름이 «ㄴ» 같은 조각으로 보였습니다)
+       그래서 body 에 붙여 잽니다. `.card .nametag` 선택자는 어디에 있든 먹습니다. */
+    document.body.appendChild(host);
+    const w = (tag.offsetWidth - 38) / 3;   // 38 = 좌우 여백 30 + 테두리 8
     host.remove();
+    // 말이 안 되는 값(숨겨져서 0 이 나온 경우 등)은 «기억하지 않고» 글씨 크기로 갈음합니다
+    if (!(w > 0)) return fs;
     this._cw = { fs, w };
     return w;
   },
@@ -116,7 +125,8 @@ const Render = {
     const fs = this.nametagSize();
     const natural = Math.ceil(this.charWidth(fs) * 3) + 38;   // 여백 30 + 테두리 8
     const room = Math.round((CONFIG.desk.width + 12) * State.deskMul()) + 8;
-    return Math.min(natural, room);
+    // 아무리 좁아도 두 글자는 들어가야 합니다 (재기가 잘못돼도 글씨가 잘리지 않게)
+    return Math.max(fs * 2 + 38, Math.min(natural, room));
   },
 
   /**

@@ -50,7 +50,6 @@ const Editor = {
     banner(null);
     Render.applyEditVisuals();
     this.refreshSexCount();
-    this.refreshSnapBtn();
     this.refreshDeskSize();
     History.refresh();
     View.applyZoom();
@@ -191,7 +190,6 @@ const Editor = {
   onPointerUp() {
     if (!this._drag) return;
     this._drag = null;
-    this.refreshSnapBtn();   // 끌면서 격자에 붙었으면 버튼이 사라집니다
     State.save();
   },
 
@@ -277,14 +275,13 @@ const Editor = {
          단계를 1→2→3→1 로 오갈 때마다 최대 10px 씩 오차가 쌓여,
          1단계로 되돌려도 배치가 처음과 달라집니다 (실제로 그렇게 어긋났습니다).
          1px 반올림만 하면 오차가 픽셀 이하라 몇 번을 오가도 제자리로 돌아옵니다.
-         대신 책상이 격자에서 벗어나므로 「줄 맞추기」 는 1단계일 때만 보여 줍니다. */
+         대신 책상이 격자에서 조금 벗어나는데, 눈에 띄지 않고 문제도 없습니다. */
       const cx = (Math.min(...d.desks.map(x => x.x)) +
                   Math.max(...d.desks.map(x => x.x + oldW))) / 2;
       const cy = (Math.min(...d.desks.map(x => x.y)) +
                   Math.max(...d.desks.map(x => x.y + oldH))) / 2;
       /* 1단계로 «돌아올 때» 는 격자에 붙입니다.
-         오차가 1px 남짓이라 스냅하면 원래 자리를 정확히 되찾고,
-         「줄 맞추기」 버튼이 괜히 뜨는 일도 없습니다.
+         오차가 1px 남짓이라 스냅하면 원래 자리를 정확히 되찾습니다.
          2·3단계에서는 스냅하면 오차가 쌓이므로 반올림만 합니다. */
       const g = CONFIG.classroom.grid;
       const fix = (v) => (step === 1 ? snap(v, g) : Math.round(v));
@@ -334,24 +331,6 @@ const Editor = {
     if (y2 - y1 > bot - top || x2 - x1 > d.room.w - 16) {
       toast('책상이 커져서 교실을 넘칩니다 — 설정 ▸ 교실 크기를 늘려 보세요', 3600);
     }
-  },
-
-  /**
-   * «줄 맞추기» 버튼은 격자에서 벗어난 것이 있을 때만 보여 줍니다.
-   * v1.10.1 이전에 만들어 둔 교실을 고치기 위한 «한 번 쓰는 도구» 라,
-   * 정리가 끝나면 저절로 사라지는 편이 툴바가 깔끔합니다.
-   */
-  refreshSnapBtn() {
-    const btn = $('#btnSnapGrid');
-    if (!btn) return;
-    const g = CONFIG.classroom.grid;
-    const d = State.data;
-    // 책상 크기를 키우면 자리가 «일부러» 격자에서 벗어납니다.
-    // 그때 이 버튼이 뜨면 눌러서 도로 흐트러뜨리게 되므로 감춥니다.
-    if (State.deskStep() !== 1) { btn.classList.add('hidden'); return; }
-    const off = (o) => o && ((o.x % g) || (o.y % g));
-    const any = d.desks.some(off) || d.lockers.some(off) || off(d.board);
-    btn.classList.toggle('hidden', !any);
   },
 
   afterSexChange() {
@@ -478,37 +457,11 @@ const Editor = {
     }
   },
 
-  /**
-   * 모든 것을 격자 위에 올려 놓습니다.
-   *
-   * v1.10.1 이전에 «책상 추가»·«모둠 추가» 로 놓은 것들은 격자에서 살짝 벗어나 있어서,
-   * 아무리 끌어 옮겨도 다른 책상과 줄이 딱 맞지 않았습니다. 그런 교실을 한 번에 고칩니다.
-   * 위치만 반 칸(10px) 안쪽으로 움직이므로 배치가 흐트러지지 않습니다.
-   */
-  snapAll() {
-    History.push();
-    const d = State.data;
-    const g = CONFIG.classroom.grid;
-    let n = 0;
-    const fix = (o) => {
-      if (!o) return;
-      const x = snap(o.x, g), y = snap(o.y, g);
-      if (x !== o.x || y !== o.y) n++;
-      o.x = x; o.y = y;
-    };
-    d.desks.forEach(fix);
-    d.lockers.forEach(fix);
-    fix(d.board);
-    this.afterStructureChange(
-      n ? `${n}개를 줄에 맞췄습니다` : '이미 모두 줄에 맞아 있습니다');
-  },
-
   afterStructureChange(msg) {
     Render.all();
     this.select(null);
     Panel.refreshCounts();
     this.refreshSexCount();
-    this.refreshSnapBtn();
     State.save();
     if (msg) toast(msg);
   },

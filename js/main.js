@@ -431,7 +431,6 @@ function wireEvents() {
   clicky('#btnAddDesk',   () => Editor.addDesk());
   clicky('#btnAddLocker', () => Editor.addLocker());
   clicky('#btnDelete',    () => Editor.deleteSelected());
-  clicky('#btnSnapGrid',  () => Editor.snapAll());
   // 책상 크기 1·2·3 (소리는 setDeskSize 안에서 — 같은 단계를 다시 누르면 아무 일도 안 합니다)
   $$('.eb-dsize').forEach(b => b.onclick = () => Editor.setDeskSize(b.dataset.dsize));
   // 남·여 자리 붓 (같은 버튼을 다시 누르면 꺼집니다) — setBrush 안에서 소리를 냅니다
