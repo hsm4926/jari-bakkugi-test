@@ -47,6 +47,8 @@ const Editor = {
     banner(null);
     Render.applyEditVisuals();
     this.refreshSexCount();
+    this.refreshSnapBtn();
+    History.refresh();
     View.applyZoom();
   },
 
@@ -147,7 +149,11 @@ const Editor = {
     const p = View.toStage(e.clientX, e.clientY);
     const dx = p.x - dg.start.x;
     const dy = p.y - dg.start.y;
-    if (Math.abs(dx) > 1 || Math.abs(dy) > 1) dg.moved = true;
+    // 실제로 움직이기 시작한 순간에만 한 장 찍습니다.
+    // (누르기만 하고 안 움직인 것까지 기록하면 «되돌리기» 가 헛돕니다)
+    if (Math.abs(dx) > 1 || Math.abs(dy) > 1) {
+      if (!dg.moved) { History.push(); dg.moved = true; }
+    }
 
     if (dg.resize) {
       const it = dg.items[0];
@@ -180,6 +186,7 @@ const Editor = {
   onPointerUp() {
     if (!this._drag) return;
     this._drag = null;
+    this.refreshSnapBtn();   // 끌면서 격자에 붙었으면 버튼이 사라집니다
     State.save();
   },
 
@@ -220,6 +227,7 @@ const Editor = {
 
     const want = this.brush || null;              // '' (지정 해제) 는 null 로
     if (State.deskSex(dk) === want) return;       // 이미 그 상태면 아무 일도 하지 않습니다
+    History.push();
     if (want) dk.sex = want; else delete dk.sex;
 
     Sound.play('click');
@@ -232,10 +240,26 @@ const Editor = {
     const marked = State.data.desks.filter(dk => State.deskSex(dk));
     if (!marked.length) { toast('성별을 정해 둔 자리가 없습니다'); return; }
     if (!confirm(`남자·여자 자리 지정 ${marked.length}개를 모두 지웁니다.\n계속할까요?`)) return;
+    History.push();
     marked.forEach(dk => delete dk.sex);
     Render.desks();
     this.afterSexChange();
     toast(`${marked.length}개의 자리 지정을 지웠습니다`);
+  },
+
+  /**
+   * «줄 맞추기» 버튼은 격자에서 벗어난 것이 있을 때만 보여 줍니다.
+   * v1.10.1 이전에 만들어 둔 교실을 고치기 위한 «한 번 쓰는 도구» 라,
+   * 정리가 끝나면 저절로 사라지는 편이 툴바가 깔끔합니다.
+   */
+  refreshSnapBtn() {
+    const btn = $('#btnSnapGrid');
+    if (!btn) return;
+    const g = CONFIG.classroom.grid;
+    const d = State.data;
+    const off = (o) => o && ((o.x % g) || (o.y % g));
+    const any = d.desks.some(off) || d.lockers.some(off) || off(d.board);
+    btn.classList.toggle('hidden', !any);
   },
 
   afterSexChange() {
@@ -267,6 +291,7 @@ const Editor = {
   },
 
   addGroup() {
+    History.push();
     const d = State.data;
     const no = (d.groups.reduce((m, g) => Math.max(m, g.no || 0), 0)) + 1;
     const g = {
@@ -292,6 +317,7 @@ const Editor = {
   },
 
   addDesk() {
+    History.push();
     const d = State.data;
 
     // 모둠이 없는 교실이면 그냥 책상 하나를 더 놓습니다
@@ -324,6 +350,7 @@ const Editor = {
   },
 
   addLocker() {
+    History.push();
     const d = State.data;
     d.lockers.push({
       id: uid('lk'),
@@ -337,6 +364,7 @@ const Editor = {
 
   deleteSelected() {
     if (!this.sel) { toast('먼저 지울 것을 눌러서 골라 주세요'); return; }
+    History.push();
     const d = State.data;
     const { kind, id } = this.sel;
 
@@ -366,6 +394,7 @@ const Editor = {
    * 위치만 반 칸(10px) 안쪽으로 움직이므로 배치가 흐트러지지 않습니다.
    */
   snapAll() {
+    History.push();
     const d = State.data;
     const g = CONFIG.classroom.grid;
     let n = 0;
@@ -382,43 +411,12 @@ const Editor = {
       n ? `${n}개를 줄에 맞췄습니다` : '이미 모두 줄에 맞아 있습니다');
   },
 
-  /** 자리는 그대로 두고 위치만 처음처럼 가지런히 */
-  relayout() {
-    const d = State.data;
-
-    // 모둠이 없는 교실이면 책상만 격자로 다시 줄 세웁니다
-    if (!d.groups.length) {
-      if (!d.desks.length) return;
-      const built = Layout.buildPlain(d.desks.length, d.room.w, d.room.h);
-      d.board = built.board;
-      d.lockers = built.lockers;
-      d.desks.slice().sort((a, b) => (a.no || 0) - (b.no || 0))
-        .forEach((dk, i) => { const s = built.desks[i]; if (s) { dk.x = s.x; dk.y = s.y; } });
-      this.afterStructureChange('처음 배치로 되돌렸습니다');
-      return;
-    }
-
-    const seats = Math.max(...d.groups.map(g => State.desksOf(g.id).length), 1);
-    const built = Layout.build(d.groups.length, seats, d.room.w, d.room.h);
-
-    d.board = built.board;
-    d.lockers = built.lockers;
-    d.groups.forEach((g, gi) => {
-      const slots = built.desks.slice(gi * seats, (gi + 1) * seats);
-      const mine = State.desksOf(g.id).sort((a, b) => (a.no || 0) - (b.no || 0));
-      mine.forEach((dk, i) => {
-        const s = slots[i] || slots[slots.length - 1];
-        if (s) { dk.x = s.x; dk.y = s.y; }
-      });
-    });
-    this.afterStructureChange('처음 배치로 되돌렸습니다');
-  },
-
   afterStructureChange(msg) {
     Render.all();
     this.select(null);
     Panel.refreshCounts();
     this.refreshSexCount();
+    this.refreshSnapBtn();
     State.save();
     if (msg) toast(msg);
   },
@@ -448,7 +446,7 @@ const Picker = {
 
     list.appendChild(el('button', {
       class: 'picker-item clear', text: '— 비우기 —',
-      onclick: () => { delete State.data.preset[deskId]; this.done(); },
+      onclick: () => { History.push(); delete State.data.preset[deskId]; this.done(); },
     }));
 
     if (!State.data.students.length) {
@@ -466,6 +464,7 @@ const Picker = {
         text: s.name + (isTaken ? ' (이미 배정됨)' : (s.id === cur ? ' ✓' : ''))
               + (odd ? (s.sex === 'g' ? ' (여)' : ' (남)') : ''),
         onclick: () => {
+          History.push();
           // 다른 자리에 있던 같은 학생은 비워 줍니다
           for (const k in State.data.preset) if (State.data.preset[k] === s.id) delete State.data.preset[k];
           State.data.preset[deskId] = s.id;

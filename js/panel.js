@@ -249,6 +249,7 @@ const Panel = {
       done = `모둠 없이 책상 ${n}개로 새로 만들었습니다`;
     }
 
+    History.push();   // 큰 변화라 되돌릴 수 있게 한 장 찍어 둡니다
     d.board = built.board;
     d.lockers = built.lockers;
     d.groups = built.groups;

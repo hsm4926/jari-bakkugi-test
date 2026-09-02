@@ -378,6 +378,7 @@ function boot() {
   Render.all();
   Panel.syncFromState();
   Secret.init();
+  History.refresh();
   wireEvents();
   StartCover.init();
 
@@ -414,7 +415,8 @@ function wireEvents() {
   $('#btnAddLocker').onclick   = () => Editor.addLocker();
   $('#btnDelete').onclick      = () => Editor.deleteSelected();
   $('#btnSnapGrid').onclick    = () => Editor.snapAll();
-  $('#btnAutoArrange').onclick = () => Editor.relayout();
+  $('#btnUndo').onclick        = () => History.undo();
+  $('#btnRedo').onclick        = () => History.redo();
 
   /* ---------- 설정 패널 ---------- */
   $('#btnPanelClose').onclick = () => Panel.close();
@@ -502,6 +504,19 @@ function wireEvents() {
 
     if (CONFIG.secret.hotkey && e.ctrlKey && e.shiftKey && (e.key === 'M' || e.key === 'm')) {
       e.preventDefault(); Secret.toggle(); return;
+    }
+
+    /* 되돌리기 — 교실 편집 중에만 듣습니다.
+       편집이 아닐 때도 되면 «뭐가 되돌아간 건지» 알 수 없어 오히려 위험합니다.
+       (맥의 Cmd 키도 함께 받습니다) */
+    const mod = e.ctrlKey || e.metaKey;
+    if (Editor.mode && mod && (e.key === 'z' || e.key === 'Z' || e.key === 'ㅋ')) {
+      e.preventDefault();
+      e.shiftKey ? History.redo() : History.undo();
+      return;
+    }
+    if (Editor.mode && mod && (e.key === 'y' || e.key === 'Y' || e.key === 'ㅛ')) {
+      e.preventDefault(); History.redo(); return;
     }
     if (typing) return;
 

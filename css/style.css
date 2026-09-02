@@ -66,6 +66,9 @@ img{image-rendering:pixelated}
 .btn-icon{padding:8px 10px; min-width:38px}
 .btn-sm{font-size:15px; padding:6px 10px; border-radius:6px}
 .btn.active{background:var(--accent); border-color:#d9a531; color:#3a2a10}
+/* 되돌릴 것이 없을 때 — 눌러도 소용없다는 걸 보여 줍니다 */
+.btn:disabled{opacity:.34; cursor:default}
+.btn:disabled:hover{background:#3b3145; border-color:#5c4d6b}
 
 /* ---------------- 상단 툴바 ---------------- */
 #toolbar{
