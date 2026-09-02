@@ -484,6 +484,7 @@ const Picker = {
   },
 
   done() {
+    Sound.play('click');   // 팝업 안의 이름·«비우기» 도 버튼입니다
     Render.desks();
     State.save();
     this.close();

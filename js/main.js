@@ -415,14 +415,18 @@ function wireEvents() {
 
   /* ---------- 편집 서브 툴바 ---------- */
   $$('.eb-mode').forEach(b => b.onclick = () => { Sound.play('click'); Editor.enter(b.dataset.editmode); });
-  $('#btnAddGroup').onclick    = () => Editor.addGroup();
-  // 남·여 자리 붓 (같은 버튼을 다시 누르면 꺼집니다)
+  // 편집 막대의 버튼도 «버튼» 이므로 전부 같은 클릭음을 냅니다.
+  // (누르는 «순간» 에 나야 하므로 Editor 안이 아니라 여기에 답니다 —
+  //  Editor 의 함수는 단축키나 다른 코드에서도 불립니다)
+  const clicky = (sel, fn) => $(sel).onclick = () => { Sound.play('click'); fn(); };
+  clicky('#btnAddGroup',  () => Editor.addGroup());
+  clicky('#btnSexClear',  () => Editor.clearSex());
+  clicky('#btnAddDesk',   () => Editor.addDesk());
+  clicky('#btnAddLocker', () => Editor.addLocker());
+  clicky('#btnDelete',    () => Editor.deleteSelected());
+  clicky('#btnSnapGrid',  () => Editor.snapAll());
+  // 남·여 자리 붓 (같은 버튼을 다시 누르면 꺼집니다) — setBrush 안에서 소리를 냅니다
   $$('.eb-brush').forEach(b => b.onclick = () => Editor.setBrush(b.dataset.brush));
-  $('#btnSexClear').onclick    = () => Editor.clearSex();
-  $('#btnAddDesk').onclick     = () => Editor.addDesk();
-  $('#btnAddLocker').onclick   = () => Editor.addLocker();
-  $('#btnDelete').onclick      = () => Editor.deleteSelected();
-  $('#btnSnapGrid').onclick    = () => Editor.snapAll();
   $('#btnUndo').onclick        = () => History.undo();
   $('#btnRedo').onclick        = () => History.redo();
 
@@ -462,7 +466,7 @@ function wireEvents() {
     e.target.value = '';
   };
   $('#btnWipe').onclick = () => Panel.wipe();
-  $('#pickerClose').onclick = () => Picker.close();
+  $('#pickerClose').onclick = () => { Sound.play('click'); Picker.close(); };
 
   /* ---------- 화면 한가운데 알림 ---------- */
   $('#alertClose').onclick = () => Alert.close();
