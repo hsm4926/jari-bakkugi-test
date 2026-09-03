@@ -429,6 +429,7 @@ function wireEvents() {
   clicky('#btnAddGroup',  () => Editor.addGroup());
   clicky('#btnSexClear',  () => Editor.clearSex());
   clicky('#btnPresetClear', () => Editor.clearPreset());
+  clicky('#btnToPreset',  () => Layouts.toPreset());
   clicky('#btnAddDesk',   () => Editor.addDesk());
   clicky('#btnAddLocker', () => Editor.addLocker());
   clicky('#btnDelete',    () => Editor.deleteSelected());

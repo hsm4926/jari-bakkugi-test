@@ -295,8 +295,11 @@ const Panel = {
 
   applyRoomSize() {
     const d = State.data;
-    d.room.w = clamp(parseInt($('#inRoomW').value, 10) || d.room.w, 400, 4000);
-    d.room.h = clamp(parseInt($('#inRoomH').value, 10) || d.room.h, 400, 4000);
+    // 8000 까지 — «운동장처럼 넓게 잡고 확대해서 구역별로 배치» 를 위해 v1.16.0 에서 늘렸습니다.
+    // 한 화면에 안 들어오는 것은 전제입니다 (끌어서 옮겨 다닙니다).
+    // ⚠️ 최소 배율이 25% 라, 7680 을 넘으면 «화면에 맞추기» 를 눌러도 가로가 다 안 들어옵니다.
+    d.room.w = clamp(parseInt($('#inRoomW').value, 10) || d.room.w, 400, 8000);
+    d.room.h = clamp(parseInt($('#inRoomH').value, 10) || d.room.h, 400, 8000);
     Render.all();
     State.save();
   },

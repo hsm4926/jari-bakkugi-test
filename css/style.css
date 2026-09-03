@@ -794,6 +794,11 @@ body.show-sex .desk.sex-g .sex-no{
 .sp-body{padding:8px; max-height:52vh; overflow-y:auto}
 #slotPanel.folded .sp-body{display:none}
 
+/* 목록 아래에 늘 붙어 있는 줄 (목록이 길어져 스크롤돼도 안 밀립니다) */
+.sp-foot{padding:8px; border-top:2px solid #4b3f58; background:#312840}
+.sp-foot .btn{width:100%; text-align:center; font-size:12px; padding:5px 8px}
+#slotPanel.folded .sp-foot{display:none}
+
 .slot-item{
   border:2px solid #4b3f58; border-radius:8px; padding:6px 7px; margin-bottom:6px;
   background:#332a3d;

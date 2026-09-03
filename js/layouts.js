@@ -180,6 +180,55 @@ const Layouts = {
     toast(`${i + 1}번 칸을 비웠습니다`);
   },
 
+  /* ============================================================
+     지금 화면의 자리를 그대로 «사전 자리» 로 (v1.16.0)
+     ------------------------------------------------------------
+     «배치 관리» 에서 학생을 끌어 자리를 손봐 놓고, 그 모습 그대로
+     «앞으로 늘 이 자리» 로 굳히고 싶을 때 씁니다.
+     예전에는 교실 편집 ▸ 사전 자리 정하기에서 한 자리씩 다시 찍어야 했습니다.
+
+     ⚠️ 사전 자리는 «공개 방식 = 사전 설정» 일 때만 실제로 쓰입니다.
+        저장만 해 두고 방식이 «무작위» 면 아무 일도 안 일어나 «안 먹힌다» 로 보입니다.
+        그래서 그 경우에만 한 번 더 물어보고 방식까지 바꿔 줍니다.
+     ============================================================ */
+  toPreset() {
+    if (this._blocked()) return;
+
+    const d = State.data;
+    // 지금 명단·책상에 실제로 있는 짝만 옮깁니다 (없는 것을 적어 두면 조용히 사라집니다)
+    const stuIds = new Set(d.students.map(x => x.id));
+    const pairs = State.orderedDesks()
+      .map(dk => [dk.id, d.assignment[dk.id]])
+      .filter(([, sid]) => sid && stuIds.has(sid));
+    if (!pairs.length) { banner('저장할 자리가 없습니다', 2600); Sound.play('click'); return; }
+
+    const had = Object.keys(d.preset || {}).length;
+    let msg = `지금 화면의 자리 ${pairs.length}명을 «사전 자리» 로 저장합니다.\n`
+            + '앞으로 자리를 섞어도 이 자리 그대로 앉습니다.';
+    if (had) msg += `\n\n⚠️ 이미 정해 둔 사전 자리 ${had}개는 지워집니다.`;
+    if (!confirm(msg + '\n\n계속할까요?')) return;
+
+    History.push();                       // 교실 편집의 ↩ 로 되돌릴 수 있게
+    d.preset = {};
+    pairs.forEach(([dk, sid]) => { d.preset[dk] = sid; });
+
+    // 방식이 «무작위» 면 저장해도 아무 일이 안 일어납니다 — 그때만 한 번 더 묻습니다.
+    let turned = false;
+    if (d.mode !== 'preset') {
+      turned = confirm('저장했습니다.\n\n지금 공개 방식이 «무작위» 라 이 자리는 아직 쓰이지 않습니다.\n'
+                     + '«사전 설정» 으로 바꿀까요?');
+      if (turned) d.mode = 'preset';
+    }
+
+    State.save();
+    Panel.refreshMode();          // 설정 칸의 «지금 공개 방식» 글씨
+    Panel.refreshCounts();        // «사전 자리 N» 이 들어간 인원 요약
+    Sound.play('click');
+    toast(`${pairs.length}명을 사전 자리로 저장했습니다`);
+    banner(turned ? `사전 자리 ${pairs.length}개 저장 · 공개 방식을 «사전 설정» 으로 바꿨습니다`
+                  : `사전 자리 ${pairs.length}개를 저장했습니다`, 3200);
+  },
+
   /** 칸 하나를 설명하는 짧은 글 */
   summary(p) {
     if (!p) return '비어 있음';
