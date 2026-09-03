@@ -30,6 +30,7 @@ const Editor = {
     $$('.eb-mode').forEach(b => b.classList.toggle('active', b.dataset.editmode === mode));
     $('#ebLayoutTools').classList.toggle('hidden', mode !== 'layout');
     $('#ebSexTools').classList.toggle('hidden', mode !== 'sex');
+    $('#ebPresetTools').classList.toggle('hidden', mode !== 'preset');
     document.body.classList.toggle('editing-sex', mode === 'sex');
 
     // «남·여 자리» 로 들어오면 «남자 자리로» 붓을 미리 쥐어 줍니다.
@@ -50,6 +51,7 @@ const Editor = {
     banner(null);
     Render.applyEditVisuals();
     this.refreshSexCount();
+    this.refreshPresetCount();
     this.refreshDeskSize();
     History.refresh();
     View.applyZoom();
@@ -250,6 +252,21 @@ const Editor = {
     toast(`${marked.length}개의 자리 지정을 지웠습니다`);
   },
 
+  /** 미리 정해 둔 자리(사전 자리)를 모두 비웁니다 */
+  clearPreset() {
+    const n = Object.keys(State.data.preset || {}).length;
+    if (!n) { toast('미리 정해 둔 자리가 없습니다'); return; }
+    // 한 자리씩 다시 정하려면 오래 걸리는 일이라 반드시 물어봅니다.
+    if (!confirm(`미리 정해 둔 자리 ${n}개를 모두 비웁니다.\n계속할까요?`)) return;
+    History.push();
+    State.data.preset = {};
+    Render.desks();
+    this.refreshPresetCount();
+    Panel.refreshCounts();
+    State.save();
+    toast(`${n}개의 사전 자리를 비웠습니다`);
+  },
+
   /* ============================================================
      책상 크기 1 · 2 · 3 단계
      ------------------------------------------------------------
@@ -350,6 +367,15 @@ const Editor = {
     if (!c.ok) {
       node.appendChild(el('span', { class: 'bad', text: `   ⚠ ${c.short}자리 모자람` }));
     }
+  },
+
+  /** 편집 툴바의 «미리 정해 둔 자리 5» 요약 */
+  refreshPresetCount() {
+    const node = $('#ebPresetCount');
+    if (!node) return;
+    if (this.mode !== 'preset') { node.textContent = ''; return; }
+    const n = Object.keys(State.data.preset || {}).length;
+    node.textContent = n ? `미리 정해 둔 자리 ${n}` : '아직 정해 둔 자리가 없습니다';
   },
 
   /* ---------------- 추가 / 삭제 ---------------- */
@@ -527,6 +553,7 @@ const Picker = {
   done() {
     Sound.play('click');   // 팝업 안의 이름·«비우기» 도 버튼입니다
     Render.desks();
+    Editor.refreshPresetCount();
     State.save();
     this.close();
   },

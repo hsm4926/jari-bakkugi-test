@@ -428,6 +428,7 @@ function wireEvents() {
   const clicky = (sel, fn) => $(sel).onclick = () => { Sound.play('click'); fn(); };
   clicky('#btnAddGroup',  () => Editor.addGroup());
   clicky('#btnSexClear',  () => Editor.clearSex());
+  clicky('#btnPresetClear', () => Editor.clearPreset());
   clicky('#btnAddDesk',   () => Editor.addDesk());
   clicky('#btnAddLocker', () => Editor.addLocker());
   clicky('#btnDelete',    () => Editor.deleteSelected());
