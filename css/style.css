@@ -159,22 +159,6 @@ img{image-rendering:pixelated}
 }
 .eb-count .bad{color:#ff9f8f}
 
-/* 「책상 24 · 모둠 6」 — 자리 배치에서 빈 자리로 밀려 나가 앉는 작은 딱지.
-   막대보다 «한 톤 어둡게» 해서 파인 것처럼 보이게 합니다.
-   버튼이 아니므로 테두리를 두르지 않습니다 — 두르면 눌러 보고 싶어집니다. */
-.eb-tally{
-  margin-left:auto;                    /* 도구들과 힌트 사이의 빈 자리로 */
-  display:flex; align-items:center; gap:9px;
-  padding:5px 13px; border-radius:999px;
-  background:#2c2436;
-  box-shadow:inset 0 1px 2px rgba(0,0,0,.32);
-  font-family:'NeoDunggeunmo',sans-serif; font-size:14px;
-  color:var(--ink-dim); white-space:nowrap;
-}
-/* 숫자만 밝게. 주황(--accent-2)은 «힌트» 가 쓰는 색이라 일부러 피했습니다 —
-   나란히 두면 둘 다 «읽어야 할 알림» 처럼 보여 시선이 갈립니다. 여기는 그냥 «값» 입니다. */
-.eb-tally b{font-weight:normal; color:var(--ink); margin-left:5px}
-.eb-tally i{width:3px; height:3px; border-radius:50%; background:#5b4d6e}
 
 /* ---------------- 교실 화면 ---------------- */
 #viewport{
@@ -750,10 +734,11 @@ body.show-sex .desk.sex-g .sex-no{
      ★ 예전 값(1710)은 이미 40px 늦어서 1720~1750 에서 막대가 두 줄로 접혔습니다. */
   .eb-hint{display:none}
 }
-@media (max-width:1300px){
-  /* 여기부터는 딱지도 못 들어갑니다 — 넣으면 막대가 두 줄이 되어 교실이 40px 좁아집니다.
-     ★ «모둠 만들기»(모둠이 없을 때) 는 «모둠» 보다 56px 넓으므로 그 경우로 잡은 값입니다. */
-  .eb-tally{display:none}
+@media (max-width:1260px){
+  /* 여기부터는 개수 문구도 못 들어갑니다 — 넣으면 막대가 두 줄이 되어 교실이 40px 좁아집니다.
+     ★ «모둠 만들기»(모둠이 없을 때) 는 «모둠» 보다 56px 넓으므로 그 경우로 잡은 값입니다.
+       실측: 모둠 있음 1170px · 없음 1220px 에서 접힘 → 40px 여유를 두고 1260. */
+  #ebTally{display:none}
 }
 @media (max-width:1710px){
   .tb-left,.tb-right{min-width:0}

@@ -370,9 +370,10 @@ const Editor = {
     }
   },
 
-  /** 편집 막대 빈 자리의 «책상 24 · 모둠 6» 딱지.
+  /** 편집 막대의 «책상 24 · 모둠 6» 요약.
       Render.desks() 가 끝날 때마다 불리므로 «고치는 즉시» 따라옵니다
-      (책상을 더하고 지우고 되돌리는 길이 여러 갈래라, 그 길마다 부르면 반드시 하나를 빠뜨립니다). */
+      (책상을 더하고 지우고 되돌리는 길이 여러 갈래라, 그 길마다 부르면 반드시 하나를 빠뜨립니다).
+      모양은 «남·여 자리»·«사전 자리» 의 요약과 똑같이 갑니다 — 같은 `.eb-count` 입니다. */
   refreshTally() {
     const node = $('#ebTally');
     if (!node) return;
@@ -381,10 +382,7 @@ const Editor = {
     node.classList.toggle('hidden', !show);
     if (!show) return;
     const d = State.data;
-    node.textContent = '';
-    node.appendChild(el('span', { text: '책상' }, el('b', { text: d.desks.length })));
-    node.appendChild(el('i'));
-    node.appendChild(el('span', { text: '모둠' }, el('b', { text: d.groups.length })));
+    node.textContent = `책상 ${d.desks.length} · 모둠 ${d.groups.length}`;
   },
 
   /** 편집 툴바의 «미리 정해 둔 자리 5» 요약 */
