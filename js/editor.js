@@ -52,6 +52,7 @@ const Editor = {
     Render.applyEditVisuals();
     this.refreshSexCount();
     this.refreshPresetCount();
+    this.refreshTally();
     this.refreshDeskSize();
     History.refresh();
     View.applyZoom();
@@ -367,6 +368,23 @@ const Editor = {
     if (!c.ok) {
       node.appendChild(el('span', { class: 'bad', text: `   ⚠ ${c.short}자리 모자람` }));
     }
+  },
+
+  /** 편집 막대 빈 자리의 «책상 24 · 모둠 6» 딱지.
+      Render.desks() 가 끝날 때마다 불리므로 «고치는 즉시» 따라옵니다
+      (책상을 더하고 지우고 되돌리는 길이 여러 갈래라, 그 길마다 부르면 반드시 하나를 빠뜨립니다). */
+  refreshTally() {
+    const node = $('#ebTally');
+    if (!node) return;
+    // «자리 배치» 에서만 보여 줍니다 — 다른 모드에는 그 모드의 요약이 따로 있습니다.
+    const show = this.mode === 'layout';
+    node.classList.toggle('hidden', !show);
+    if (!show) return;
+    const d = State.data;
+    node.textContent = '';
+    node.appendChild(el('span', { text: '책상' }, el('b', { text: d.desks.length })));
+    node.appendChild(el('i'));
+    node.appendChild(el('span', { text: '모둠' }, el('b', { text: d.groups.length })));
   },
 
   /** 편집 툴바의 «미리 정해 둔 자리 5» 요약 */
