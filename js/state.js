@@ -61,6 +61,11 @@ const State = {
         sound: CONFIG.sound.on,
         volume: CONFIG.sound.masterVolume,
         dot: this.freshDot(),   // 표시점 모양 (설정 화면에서 눈으로 보며 조절)
+        // 마지막으로 보고 있던 자리 (배율 + 화면을 끌어 놓은 위치).
+        // 교실을 운동장만큼 크게 잡고 한쪽 구석만 보며 쓰는 경우가 있어,
+        // 켤 때마다 «화면에 맞추기» 로 돌아가면 매번 다시 찾아가야 합니다.
+        // auto = true 면 «화면에 맞추기» 상태라 배율·위치를 무시하고 다시 맞춥니다.
+        view: { auto: true, zoom: 1, panX: 0, panY: 0 },
       },
       savedAt: null,
     };
@@ -87,6 +92,9 @@ const State = {
     out.settings = Object.assign({}, base.settings, d.settings);
     // 표시점 모양은 항목이 빠져 있을 수 있으므로 한 겹 더 채워 줍니다
     out.settings.dot = Object.assign({}, this.freshDot(), (d.settings || {}).dot);
+    // 마지막으로 보던 자리도 한 겹 더 (예전 저장 자료에는 아예 없습니다)
+    out.settings.view = Object.assign({ auto: true, zoom: 1, panX: 0, panY: 0 },
+                                      (d.settings || {}).view);
     ['groups', 'desks', 'lockers', 'students', 'presets'].forEach(k => {
       if (!Array.isArray(out[k])) out[k] = base[k];
     });

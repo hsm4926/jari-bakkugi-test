@@ -295,11 +295,24 @@ const Panel = {
 
   applyRoomSize() {
     const d = State.data;
-    // 8000 까지 — «운동장처럼 넓게 잡고 확대해서 구역별로 배치» 를 위해 v1.16.0 에서 늘렸습니다.
-    // 한 화면에 안 들어오는 것은 전제입니다 (끌어서 옮겨 다닙니다).
-    // ⚠️ 최소 배율이 25% 라, 7680 을 넘으면 «화면에 맞추기» 를 눌러도 가로가 다 안 들어옵니다.
-    d.room.w = clamp(parseInt($('#inRoomW').value, 10) || d.room.w, 400, 8000);
-    d.room.h = clamp(parseInt($('#inRoomH').value, 10) || d.room.h, 400, 8000);
+    // 3000 까지 (v1.17.0). 처음엔 8000 까지 열었다가 «너무 크면 의미가 없다» 는 판단으로 내렸습니다 —
+    // 기본 교실(1880×1000)의 1.6배 폭 · 3배 높이면 «구역을 나눠 배치» 하기에 충분하고,
+    // 그 이상은 25% 로 줄여 놔도 한 화면에 안 들어와 오히려 쓰기가 나빠집니다.
+    const MIN = 400, MAX = 3000;
+    const before = [d.room.w, d.room.h];
+    d.room.w = clamp(parseInt($('#inRoomW').value, 10) || d.room.w, MIN, MAX);
+    d.room.h = clamp(parseInt($('#inRoomH').value, 10) || d.room.h, MIN, MAX);
+
+    // ★ 잘라 낸 값을 «칸에도» 다시 적어 줍니다.
+    //   안 그러면 99999 라고 적힌 채 교실만 3000 이 되어, 다음에 열어 볼 때
+    //   «3000 인데 왜 99999 라고 써 있지» 가 됩니다. 눈에 보이는 것과 실제가 달라지면 안 됩니다.
+    const over = String(parseInt($('#inRoomW').value, 10)) !== String(d.room.w)
+              || String(parseInt($('#inRoomH').value, 10)) !== String(d.room.h);
+    $('#inRoomW').value = d.room.w;
+    $('#inRoomH').value = d.room.h;
+    if (over) toast(`교실 크기는 ${MIN} ~ ${MAX} 까지입니다`);
+
+    if (before[0] === d.room.w && before[1] === d.room.h) return;
     Render.all();
     State.save();
   },

@@ -205,6 +205,7 @@ const View = {
     this.auto = !!keepAuto;
     this.zoom = this.snapDown(clamp(z, CONFIG.view.minZoom, CONFIG.view.maxZoom) + this.step() / 2);
     this.applyZoom();
+    this.remember();
   },
 
   /** 확대(+1) · 축소(-1). 안전 배율 계단을 한 칸씩 오르내립니다 */
@@ -212,9 +213,50 @@ const View = {
     this.auto = false;
     this.zoom = this.stepZoom(dir > 0 ? 1 : -1);
     this.applyZoom();
+    this.remember();
   },
 
-  fit() { this.auto = true; this.applyZoom(); toast('화면에 맞췄습니다'); },
+  fit() { this.auto = true; this.applyZoom(); this.remember(); toast('화면에 맞췄습니다'); },
+
+  /* ============================================================
+     «마지막으로 보고 있던 자리» 기억하기 (v1.17.0)
+     ------------------------------------------------------------
+     교실을 운동장만큼 넓게 잡고 한쪽 구석만 보며 쓰는 경우가 있습니다.
+     그때 켤 때마다 «화면에 맞추기» 로 돌아가면 매번 다시 찾아가야 합니다.
+
+     ★ 끌고 있는 «도중» 에는 부르지 않습니다 — 마우스가 움직일 때마다
+       저장이 돌면 헛일입니다. 손을 뗄 때·배율을 바꿀 때만 적어 둡니다.
+     ⚠️ 뒤집기(flipped)는 여기 넣지 않습니다. «지금 잠깐 보는 시점» 이라
+       다음에 켰을 때 뒤집힌 채로 뜨면 오히려 당황합니다.
+     ============================================================ */
+  remember() {
+    const st = State.data.settings;
+    if (!st) return;
+    st.view = { auto: !!this.auto, zoom: this.zoom, panX: this.panX, panY: this.panY };
+    State.save();
+  },
+
+  /**
+   * 켤 때 그 자리로 되돌립니다. Render.all() «전» 에 부릅니다
+   * (Render.all() 끝에서 applyZoom() 이 이 값을 화면에 씁니다).
+   */
+  restore() {
+    const v = (State.data.settings || {}).view;
+    if (!v || v.auto !== false) { this.auto = true; return; }
+    this.auto = false;
+    this.zoom = clamp(+v.zoom || 1, CONFIG.view.minZoom, CONFIG.view.maxZoom);
+    this.panX = +v.panX || 0;
+    this.panY = +v.panY || 0;
+
+    // ★ 그 사이에 교실을 줄였다면 그 자리에 교실이 «아예 없을» 수 있습니다.
+    //   빈 화면이 뜨면 고장으로 보이므로, 그럴 때만 화면에 맞추기로 돌아갑니다.
+    const vp = $('#viewport').getBoundingClientRect();
+    const d = State.data.room;
+    const w = d.w * this.zoom, h = d.h * this.zoom;
+    const seen = Math.max(0, Math.min(vp.width,  this.panX + w) - Math.max(0, this.panX))
+               * Math.max(0, Math.min(vp.height, this.panY + h) - Math.max(0, this.panY));
+    if (seen < vp.width * vp.height * 0.05) { this.auto = true; this.panX = this.panY = 0; }
+  },
 
   /** 화면 좌표 → 교실 안의 좌표 */
   toStage(clientX, clientY) {
@@ -383,6 +425,7 @@ function boot() {
   Render.startAvatarTicker();
 
   document.body.classList.toggle('show-grid', CONFIG.view.showGridAlways);
+  View.restore();     // 마지막으로 보고 있던 자리로 (Render.all() 이 화면에 씁니다)
   Render.all();
   Panel.syncFromState();
   Secret.init();
@@ -596,7 +639,11 @@ const Pan = {
   },
   end() {
     this.on = false;
-    if (this._grabbed) { this._grabbed = false; document.body.classList.remove('panning'); }
+    if (this._grabbed) {
+      this._grabbed = false;
+      document.body.classList.remove('panning');
+      View.remember();          // 끌기가 «끝났을 때» 만 적어 둡니다
+    }
   },
 };
 

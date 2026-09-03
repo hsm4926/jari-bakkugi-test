@@ -4,15 +4,15 @@
 <meta charset="utf-8">
 <meta name="theme-color" content="#2c2434">
 <meta name="description" content="초등학교 교실용 자리 바꾸기 프로그램. 알을 깨서 한 명씩 자리를 공개합니다.">
-<link rel="manifest" href="manifest.webmanifest?v=1.16.0-0903-102739">
-<link rel="apple-touch-icon" href="icons/icon-180.png?v=1.16.0-0903-102739">
+<link rel="manifest" href="manifest.webmanifest?v=1.17.0-0903-105901">
+<link rel="apple-touch-icon" href="icons/icon-180.png?v=1.17.0-0903-105901">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="자리 바꾸기">
 <script>window.__JARI_TEST=true;</script>
 <title>[테스트] 우리 반 자리 바꾸기</title>
-<link rel="icon" href="assets/sprites/desk-icon.png?v=1.16.0-0903-102739">
-<link rel="stylesheet" href="css/fonts.css?v=1.16.0-0903-102739">
-<link rel="stylesheet" href="css/style.css?v=1.16.0-0903-102739">
+<link rel="icon" href="assets/sprites/desk-icon.png?v=1.17.0-0903-105901">
+<link rel="stylesheet" href="css/fonts.css?v=1.17.0-0903-105901">
+<link rel="stylesheet" href="css/style.css?v=1.17.0-0903-105901">
 <style>
   .tb-test{
     position:fixed; right:14px; bottom:12px; z-index:1000; pointer-events:none;
@@ -35,9 +35,9 @@
 <div id="startCover">
   <div class="sc-box">
     <div class="sc-cast">
-      <img src="assets/sprites/student/boy1-3.png?v=1.16.0-0903-102739" alt="">
-      <img src="assets/sprites/egg/01.png?v=1.16.0-0903-102739" class="sc-egg" alt="">
-      <img src="assets/sprites/student/girl1-1.png?v=1.16.0-0903-102739" alt="">
+      <img src="assets/sprites/student/boy1-3.png?v=1.17.0-0903-105901" alt="">
+      <img src="assets/sprites/egg/01.png?v=1.17.0-0903-105901" class="sc-egg" alt="">
+      <img src="assets/sprites/student/girl1-1.png?v=1.17.0-0903-105901" alt="">
     </div>
     <div class="sc-title">우리 반 자리 바꾸기</div>
     <div class="sc-ver" id="scVer"></div>
@@ -50,7 +50,7 @@
 <!-- ===================== 상단 툴바 ===================== -->
 <header id="toolbar">
   <div class="tb-left">
-    <img class="tb-icon" src="assets/sprites/desk-icon.png?v=1.16.0-0903-102739" alt="">
+    <img class="tb-icon" src="assets/sprites/desk-icon.png?v=1.17.0-0903-105901" alt="">
     <span class="tb-title">우리 반 자리 바꾸기</span>
     <span class="tb-ver" id="tbVer"></span>
   </div>
@@ -261,18 +261,19 @@
         <div class="sec-body">
           <div class="field">
             <label>가로</label>
-            <input type="number" id="inRoomW" min="400" max="8000" step="20">
+            <input type="number" id="inRoomW" min="400" max="3000" step="20">
           </div>
           <div class="field">
             <label>세로</label>
-            <input type="number" id="inRoomH" min="400" max="8000" step="20">
+            <input type="number" id="inRoomH" min="400" max="3000" step="20">
           </div>
           <div class="row"><button id="btnRoomDefault" class="btn btn-sm">기본 크기로 되돌리기</button></div>
           <p class="hint">기본 크기는 교실 TV(1920×1080)를 전체 화면으로 썼을 때
             100% 배율에서 화면이 거의 꽉 차도록 맞춘 값입니다.<br>
-            <b>400 ~ 8000</b> 까지 됩니다. 크게 잡으면 운동장처럼 넓은 마당이 되고,
-            한 화면에 다 안 들어오면 <b>빈 바닥을 끌어서</b> 원하는 구역으로 옮겨 다니며 배치합니다.
-            (<code>−</code> 로 줄여 전체를 보고, <code>+</code> 로 키워 그 자리를 손봅니다)</p>
+            <b>400 ~ 3000</b> 까지 됩니다. 크게 잡으면 마당처럼 넓어져 구역을 나눠 배치할 수 있고,
+            한 화면에 다 안 들어오면 <b>빈 바닥을 끌어서</b> 옮겨 다니며 배치합니다.
+            (<code>−</code> 로 줄여 전체를 보고, <code>+</code> 로 키워 그 자리를 손봅니다.
+            <b>보고 있던 자리는 그대로 기억</b>되어 다음에 켜도 유지됩니다)</p>
         </div>
       </div>
 
@@ -426,23 +427,23 @@
 
 <div id="toast" class="hidden"></div>
 
-<script src="version.js?v=1.16.0-0903-102739"></script>
-<script src="config.js?v=1.16.0-0903-102739"></script>
-<script src="js/util.js?v=1.16.0-0903-102739"></script>
-<script src="js/audio.js?v=1.16.0-0903-102739"></script>
-<script src="js/state.js?v=1.16.0-0903-102739"></script>
-<script src="js/seats.js?v=1.16.0-0903-102739"></script>
-<script src="js/history.js?v=1.16.0-0903-102739"></script>
-<script src="js/layouts.js?v=1.16.0-0903-102739"></script>
-<script src="js/arrange.js?v=1.16.0-0903-102739"></script>
-<script src="js/layout.js?v=1.16.0-0903-102739"></script>
-<script src="js/render.js?v=1.16.0-0903-102739"></script>
-<script src="js/editor.js?v=1.16.0-0903-102739"></script>
-<script src="js/shuffle.js?v=1.16.0-0903-102739"></script>
-<script src="js/panel.js?v=1.16.0-0903-102739"></script>
-<script src="js/presets.js?v=1.16.0-0903-102739"></script>
-<script src="js/main.js?v=1.16.0-0903-102739"></script>
-<div class="tb-test">테스트판 0903-102739</div>
+<script src="version.js?v=1.17.0-0903-105901"></script>
+<script src="config.js?v=1.17.0-0903-105901"></script>
+<script src="js/util.js?v=1.17.0-0903-105901"></script>
+<script src="js/audio.js?v=1.17.0-0903-105901"></script>
+<script src="js/state.js?v=1.17.0-0903-105901"></script>
+<script src="js/seats.js?v=1.17.0-0903-105901"></script>
+<script src="js/history.js?v=1.17.0-0903-105901"></script>
+<script src="js/layouts.js?v=1.17.0-0903-105901"></script>
+<script src="js/arrange.js?v=1.17.0-0903-105901"></script>
+<script src="js/layout.js?v=1.17.0-0903-105901"></script>
+<script src="js/render.js?v=1.17.0-0903-105901"></script>
+<script src="js/editor.js?v=1.17.0-0903-105901"></script>
+<script src="js/shuffle.js?v=1.17.0-0903-105901"></script>
+<script src="js/panel.js?v=1.17.0-0903-105901"></script>
+<script src="js/presets.js?v=1.17.0-0903-105901"></script>
+<script src="js/main.js?v=1.17.0-0903-105901"></script>
+<div class="tb-test">테스트판 0903-105901</div>
 <script>
 /* 서비스 워커 등록 — 인터넷이 끊겨도 열리게 해 줍니다. 실패해도 프로그램은 그대로 돌아갑니다. */
 if ('serviceWorker' in navigator) {

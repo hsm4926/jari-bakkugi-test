@@ -187,9 +187,12 @@ const Layouts = {
      «앞으로 늘 이 자리» 로 굳히고 싶을 때 씁니다.
      예전에는 교실 편집 ▸ 사전 자리 정하기에서 한 자리씩 다시 찍어야 했습니다.
 
-     ⚠️ 사전 자리는 «공개 방식 = 사전 설정» 일 때만 실제로 쓰입니다.
-        저장만 해 두고 방식이 «무작위» 면 아무 일도 안 일어나 «안 먹힌다» 로 보입니다.
-        그래서 그 경우에만 한 번 더 물어보고 방식까지 바꿔 줍니다.
+     ★ 공개 방식(무작위 ↔ 사전 설정)은 **건드리지 않습니다.** 선생님이 직접 켜고 끕니다.
+       v1.16.0 에서 «사전 설정으로 바꿀까요?» 를 한 번 더 물어봤는데 되레 헷갈렸습니다 (v1.17.0 에서 뺐습니다) —
+       거기서 «취소» 하면 «저장이 안 됐다» 로 읽혔습니다. (실은 저장은 되어 있었고,
+       방식이 «무작위» 라 섞어도 그대로가 아니었을 뿐입니다)
+       📌 여기서 하는 일은 **«사전 자리에 적어 두는 것» 하나뿐**입니다.
+          그 말만 하고, 하지도 않을 약속(«섞어도 그대로 앉습니다»)은 하지 않습니다.
      ============================================================ */
   toPreset() {
     if (this._blocked()) return;
@@ -203,8 +206,7 @@ const Layouts = {
     if (!pairs.length) { banner('저장할 자리가 없습니다', 2600); Sound.play('click'); return; }
 
     const had = Object.keys(d.preset || {}).length;
-    let msg = `지금 화면의 자리 ${pairs.length}명을 «사전 자리» 로 저장합니다.\n`
-            + '앞으로 자리를 섞어도 이 자리 그대로 앉습니다.';
+    let msg = `지금 화면의 자리 ${pairs.length}명을 «사전 자리» 로 저장합니다.`;
     if (had) msg += `\n\n⚠️ 이미 정해 둔 사전 자리 ${had}개는 지워집니다.`;
     if (!confirm(msg + '\n\n계속할까요?')) return;
 
@@ -212,21 +214,12 @@ const Layouts = {
     d.preset = {};
     pairs.forEach(([dk, sid]) => { d.preset[dk] = sid; });
 
-    // 방식이 «무작위» 면 저장해도 아무 일이 안 일어납니다 — 그때만 한 번 더 묻습니다.
-    let turned = false;
-    if (d.mode !== 'preset') {
-      turned = confirm('저장했습니다.\n\n지금 공개 방식이 «무작위» 라 이 자리는 아직 쓰이지 않습니다.\n'
-                     + '«사전 설정» 으로 바꿀까요?');
-      if (turned) d.mode = 'preset';
-    }
-
     State.save();
-    Panel.refreshMode();          // 설정 칸의 «지금 공개 방식» 글씨
-    Panel.refreshCounts();        // «사전 자리 N» 이 들어간 인원 요약
+    Editor.refreshPresetCount();  // 편집 막대의 «미리 정해 둔 자리 N»
+    Panel.refreshCounts();        // 설정 화면의 인원 요약
     Sound.play('click');
     toast(`${pairs.length}명을 사전 자리로 저장했습니다`);
-    banner(turned ? `사전 자리 ${pairs.length}개 저장 · 공개 방식을 «사전 설정» 으로 바꿨습니다`
-                  : `사전 자리 ${pairs.length}개를 저장했습니다`, 3200);
+    banner(`${pairs.length}명을 사전 자리로 저장했습니다`, 2800);
   },
 
   /** 칸 하나를 설명하는 짧은 글 */
