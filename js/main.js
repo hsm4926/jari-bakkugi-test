@@ -247,15 +247,32 @@ const View = {
     this.zoom = clamp(+v.zoom || 1, CONFIG.view.minZoom, CONFIG.view.maxZoom);
     this.panX = +v.panX || 0;
     this.panY = +v.panY || 0;
+  },
 
-    // ★ 그 사이에 교실을 줄였다면 그 자리에 교실이 «아예 없을» 수 있습니다.
-    //   빈 화면이 뜨면 고장으로 보이므로, 그럴 때만 화면에 맞추기로 돌아갑니다.
+  /**
+   * 되살린 자리에 교실이 «아예 안 보이면» 화면에 맞추기로 되돌립니다.
+   * (그 사이 교실을 줄였을 때 빈 화면이 뜨면 고장으로 보입니다)
+   *
+   * ★ 반드시 «그려 놓고 재서» 판단합니다. Render.all() «뒤» 에 부릅니다.
+   *
+   * 🩸 v1.17.0 에서 이걸 «계산» 으로 때웠다가 틀렸습니다 —
+   *    `#viewport` 는 가운데 정렬이라, 교실이 화면보다 크면 무대가 **음수 자리에서 시작**합니다.
+   *    (3000 교실 · 133% → 무대가 left:-1200 에서 시작) 그래서 «왼쪽 위 구석을 보려고
+   *    오른쪽으로 끈» 평범한 자리(panX=+1200)가 «화면 밖» 으로 잘못 계산돼,
+   *    껐다 켜면 배율·위치가 리셋됐습니다. 67% 에서는 필요한 이동이 작아 안 걸렸습니다.
+   *    📌 교훈: **화면에 실제로 어디 놓이는지는 «재는» 것이지 «계산하는» 것이 아니다.**
+   */
+  ensureVisible() {
+    if (this.auto) return;
     const vp = $('#viewport').getBoundingClientRect();
-    const d = State.data.room;
-    const w = d.w * this.zoom, h = d.h * this.zoom;
-    const seen = Math.max(0, Math.min(vp.width,  this.panX + w) - Math.max(0, this.panX))
-               * Math.max(0, Math.min(vp.height, this.panY + h) - Math.max(0, this.panY));
-    if (seen < vp.width * vp.height * 0.05) { this.auto = true; this.panX = this.panY = 0; }
+    const st = $('#stage').getBoundingClientRect();
+    const w = Math.min(vp.right, st.right) - Math.max(vp.left, st.left);
+    const h = Math.min(vp.bottom, st.bottom) - Math.max(vp.top, st.top);
+    if (w > 0 && h > 0) return;          // 한 귀퉁이라도 보이면 그대로 둡니다
+    this.auto = true;
+    this.panX = this.panY = 0;
+    this.applyZoom();
+    this.remember();
   },
 
   /** 화면 좌표 → 교실 안의 좌표 */
@@ -427,6 +444,7 @@ function boot() {
   document.body.classList.toggle('show-grid', CONFIG.view.showGridAlways);
   View.restore();     // 마지막으로 보고 있던 자리로 (Render.all() 이 화면에 씁니다)
   Render.all();
+  View.ensureVisible();   // 그 자리에 교실이 아예 안 보이면 화면에 맞추기로 (그린 «뒤» 에 재서 판단)
   Panel.syncFromState();
   Secret.init();
   History.refresh();

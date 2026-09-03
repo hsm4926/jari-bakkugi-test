@@ -215,6 +215,10 @@ const Layouts = {
     pairs.forEach(([dk, sid]) => { d.preset[dk] = sid; });
 
     State.save();
+    // ★ 책상을 «다시 그려야» 합니다. 사전 자리 이름표(`.desk-preset`)는 Render.desks() 가 찍는데,
+    //   숫자만 고쳐 두면 교실 편집 ▸ 사전 자리 정하기 에 들어갔을 때 여전히 «비어 있음» 으로 보입니다.
+    //   (v1.16.0 에서 빠뜨려, 껐다 켜야 보였습니다 — 저장은 되어 있었습니다)
+    Render.desks();
     Editor.refreshPresetCount();  // 편집 막대의 «미리 정해 둔 자리 N»
     Panel.refreshCounts();        // 설정 화면의 인원 요약
     Sound.play('click');
