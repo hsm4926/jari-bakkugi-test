@@ -551,7 +551,9 @@ const Picker = {
   },
 
   done() {
-    Sound.play('click');   // 팝업 안의 이름·«비우기» 도 버튼입니다
+    // 소리를 내지 않습니다 — 이름을 고르는 것은 «버튼을 누르는 일» 이 아니라
+    // «그 자리에 누구를 앉힐지 정하는 일» 입니다. 책상을 눌렀을 때와 같은 취급입니다.
+    // (스물몇 자리를 연달아 정할 때 딸깍이 연발돼 시끄럽기도 합니다)
     Render.desks();
     Editor.refreshPresetCount();
     State.save();
