@@ -208,10 +208,55 @@ const View = {
     this.remember();
   },
 
-  /** 확대(+1) · 축소(-1). 안전 배율 계단을 한 칸씩 오르내립니다 */
-  zoomBy(dir) {
+  /* ============================================================
+     확대·축소의 «기준점» (v1.18.0)
+     ------------------------------------------------------------
+     휠을 굴리면 **마우스가 가리키는 자리** 를 기준으로 커지고 작아집니다.
+     마우스 밑에 있던 책상이 확대한 뒤에도 마우스 밑에 그대로 남습니다.
+     (예전에는 어디서 굴리든 교실 한가운데를 기준으로 커져서,
+      구석을 보려면 확대한 다음 다시 끌어 와야 했습니다)
+
+     버튼·단축키처럼 마우스 자리가 없으면 **화면 한가운데** 가 기준입니다.
+
+     ★ 마우스가 교실 «바깥»(어두운 바탕)에 있으면 가장 가까운 교실 가장자리를 기준으로 씁니다.
+       바탕의 한 점을 붙박이로 두면 확대할수록 교실이 그 점에서 멀리 밀려나
+       몇 번 만에 화면 밖으로 사라집니다.
+     ★ 축소해서 교실이 화면에 다 들어오게 되면 그 방향은 **가운데로 되돌립니다.**
+       구석에서 확대했다가 다른 곳에서 축소하면 교실이 한쪽으로 치우친 채 남기 때문입니다.
+       (확대할 때는 하지 않습니다 — 마우스를 따라가는 게 이 기능의 전부라서)
+     ============================================================ */
+  /**
+   * 확대(+1) · 축소(-1). 안전 배율 계단을 한 칸씩 오르내립니다.
+   * @param clientX,clientY  기준점 (휠 = 마우스 자리). 생략하면 화면 한가운데.
+   */
+  zoomBy(dir, clientX, clientY) {
+    const z0 = this.zoom;
+    const z1 = this.stepZoom(dir > 0 ? 1 : -1);
+    if (z1 === z0) return;               // 이미 끝 배율입니다
+
+    // 교실이 지금 화면 어디에 놓였는지는 «재서» 씁니다 (계산으로 때우지 않습니다 — v1.17.1 교훈)
+    const vp = $('#viewport').getBoundingClientRect();
+    const st = $('#stage').getBoundingClientRect();
+    const ax = clamp(clientX == null ? vp.left + vp.width / 2 : clientX, st.left, st.right);
+    const ay = clamp(clientY == null ? vp.top + vp.height / 2 : clientY, st.top, st.bottom);
+
+    // 교실은 자기 한가운데를 중심으로 커집니다. 그래서 «교실 가운데 ↔ 기준점» 거리도
+    // k 배가 되는데, 늘어난 만큼 반대로 밀어 주면 기준점 밑의 자리가 제자리에 남습니다.
+    const k = z1 / z0;
+    let px = this.panX + (ax - (st.left + st.width / 2)) * (1 - k);
+    let py = this.panY + (ay - (st.top + st.height / 2)) * (1 - k);
+    if (dir < 0) {
+      if (st.width * k <= vp.width)   px = 0;
+      if (st.height * k <= vp.height) py = 0;
+    }
+    px = Math.round(px); py = Math.round(py);   // 픽셀 그림은 정수 자리에 놓여야 반듯합니다
+
+    // 화면을 끄는 도중에 굴렸다면 끌기의 출발점도 같이 옮깁니다 (안 그러면 다음 움직임에 튑니다)
+    if (Pan.on) { Pan.ox += px - this.panX; Pan.oy += py - this.panY; }
+
     this.auto = false;
-    this.zoom = this.stepZoom(dir > 0 ? 1 : -1);
+    this.zoom = z1;
+    this.panX = px; this.panY = py;
     this.applyZoom();
     this.remember();
   },
@@ -569,10 +614,11 @@ function wireEvents() {
     Arrange.onPointerUp(e); Editor.onPointerUp(); Pan.end();
   });
 
-  // 휠로 확대/축소
+  // 휠로 확대/축소 — 마우스가 가리키는 자리를 기준으로 (View.zoomBy 설명 참고)
   $('#viewport').addEventListener('wheel', (e) => {
     e.preventDefault();
-    View.zoomBy(e.deltaY < 0 ? +1 : -1);
+    if (!e.deltaY) return;   // 트랙패드를 옆으로만 민 것 (예전엔 이것도 «축소» 로 읽었습니다)
+    View.zoomBy(e.deltaY < 0 ? +1 : -1, e.clientX, e.clientY);
   }, { passive: false });
 
   // 팝업 바깥을 누르면 닫기
